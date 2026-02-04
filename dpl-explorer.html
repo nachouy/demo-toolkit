@@ -1259,9 +1259,7 @@
                 name: '',
                 description: '',
                 metric_type: 'sum',
-                field: 'engaged_time_inc',
-                chart_type: 'bar',
-                field2: 'revenue'
+                field: 'engaged_time_inc'
             });
 
             const handleCreateMetric = () => {
@@ -1272,9 +1270,7 @@
                     name: '',
                     description: '',
                     metric_type: 'sum',
-                    field: 'engaged_time_inc',
-                    chart_type: 'bar',
-                    field2: 'revenue'
+                    field: 'engaged_time_inc'
                 });
                 setShowModal(false);
             };
@@ -1390,10 +1386,9 @@
                                 value={newMetric.chart_type || 'bar'}
                                 onChange={(e) => setNewMetric({...newMetric, chart_type: e.target.value})}
                             >
-                                <option value="bar">Bar Chart</option>
-                                <option value="line">Line Chart</option>
-                                <option value="scatter">Scatter Plot (2 metrics)</option>
-                                <option value="bubble">Bubble Chart (2 metrics)</option>
+                                <option value="bar">Bar Chart (Single Metric)</option>
+                                <option value="line">Line Chart (Single Metric)</option>
+                                <option value="scatter">Scatter Plot (Compare 2 Metrics)</option>
                             </select>
                         </div>
 
@@ -1412,9 +1407,9 @@
                             </select>
                         </div>
 
-                        {(newMetric.chart_type === 'scatter' || newMetric.chart_type === 'bubble') && (
+                        {newMetric.chart_type === 'scatter' && (
                             <div className="form-group">
-                                <label className="form-label">Secondary Metric (for comparison)</label>
+                                <label className="form-label">Secondary Metric (Y-axis)</label>
                                 <select
                                     className="form-select"
                                     value={newMetric.field2 || 'revenue'}
@@ -1470,229 +1465,88 @@
                     chartInstance.current.destroy();
                 }
 
-                const chartType = metric.chart_type || 'bar';
+                // Calculate metric by country
+                const metricByCountry = {};
                 
-                // For scatter and bubble, we need two metrics
-                if (chartType === 'scatter' || chartType === 'bubble') {
-                    // Calculate both metrics by country
-                    const metricsByCountry = {};
+                data.forEach(row => {
+                    const country = row.ip_country || 'Unknown';
                     
-                    data.forEach(row => {
-                        const country = row.ip_country || 'Unknown';
-                        
-                        if (!metricsByCountry[country]) {
-                            metricsByCountry[country] = { 
-                                values1: [], 
-                                values2: [],
-                                count: 0 
-                            };
-                        }
+                    if (!metricByCountry[country]) {
+                        metricByCountry[country] = { values: [], count: 0 };
+                    }
 
-                        let value1 = 0, value2 = 0;
-                        
-                        if (metric.field === 'revenue') {
-                            try {
-                                const extraData = JSON.parse(row.extra_data || '{}');
-                                value1 = parseFloat(extraData.woocommerce_payment_amount || 0);
-                            } catch {}
-                        } else if (metric.field === 'engaged_time_inc') {
-                            value1 = parseInt(row.engaged_time_inc || 0);
-                        } else {
-                            try {
-                                const extraData = JSON.parse(row.extra_data || '{}');
-                                value1 = parseFloat(extraData[metric.field] || 0);
-                            } catch {}
-                        }
+                    let value = 0;
+                    if (metric.field === 'revenue') {
+                        try {
+                            const extraData = JSON.parse(row.extra_data || '{}');
+                            value = parseFloat(extraData.woocommerce_payment_amount || 0);
+                        } catch {}
+                    } else if (metric.field === 'engaged_time_inc') {
+                        value = parseInt(row.engaged_time_inc || 0);
+                    } else {
+                        try {
+                            const extraData = JSON.parse(row.extra_data || '{}');
+                            value = parseFloat(extraData[metric.field] || 0);
+                        } catch {}
+                    }
 
-                        if (metric.field2 === 'revenue') {
-                            try {
-                                const extraData = JSON.parse(row.extra_data || '{}');
-                                value2 = parseFloat(extraData.woocommerce_payment_amount || 0);
-                            } catch {}
-                        } else if (metric.field2 === 'engaged_time_inc') {
-                            value2 = parseInt(row.engaged_time_inc || 0);
-                        } else {
-                            try {
-                                const extraData = JSON.parse(row.extra_data || '{}');
-                                value2 = parseFloat(extraData[metric.field2] || 0);
-                            } catch {}
-                        }
+                    metricByCountry[country].values.push(value);
+                    metricByCountry[country].count += 1;
+                });
 
-                        metricsByCountry[country].values1.push(value1);
-                        metricsByCountry[country].values2.push(value2);
-                        metricsByCountry[country].count += 1;
-                    });
+                // Calculate based on metric type
+                const labels = Object.keys(metricByCountry).slice(0, 10);
+                const chartData = labels.map(country => {
+                    const { values, count } = metricByCountry[country];
+                    
+                    switch (metric.metric_type) {
+                        case 'sum':
+                            return values.reduce((a, b) => a + b, 0);
+                        case 'average':
+                            return values.reduce((a, b) => a + b, 0) / count;
+                        case 'count':
+                            return count;
+                        case 'max':
+                            return Math.max(...values);
+                        case 'min':
+                            return Math.min(...values);
+                        default:
+                            return values.reduce((a, b) => a + b, 0);
+                    }
+                });
 
-                    // Calculate aggregated values
-                    const countries = Object.keys(metricsByCountry).slice(0, 10);
-                    const scatterData = countries.map(country => {
-                        const { values1, values2, count } = metricsByCountry[country];
-                        
-                        let x = 0, y = 0;
-                        
-                        switch (metric.metric_type) {
-                            case 'sum':
-                                x = values1.reduce((a, b) => a + b, 0);
-                                y = values2.reduce((a, b) => a + b, 0);
-                                break;
-                            case 'average':
-                                x = values1.reduce((a, b) => a + b, 0) / count;
-                                y = values2.reduce((a, b) => a + b, 0) / count;
-                                break;
-                            case 'count':
-                                x = count;
-                                y = count;
-                                break;
-                            case 'max':
-                                x = Math.max(...values1);
-                                y = Math.max(...values2);
-                                break;
-                            case 'min':
-                                x = Math.min(...values1);
-                                y = Math.min(...values2);
-                                break;
-                        }
-
-                        return {
-                            x,
-                            y,
-                            r: chartType === 'bubble' ? Math.min(count, 30) : 5,
-                            label: country
-                        };
-                    });
-
-                    chartInstance.current = new Chart(ctx, {
-                        type: chartType === 'bubble' ? 'bubble' : 'scatter',
-                        data: {
-                            datasets: [{
-                                label: metric.name,
-                                data: scatterData,
-                                backgroundColor: 'rgba(94, 186, 0, 0.6)',
-                                borderColor: '#5eba00',
-                                borderWidth: 2
-                            }]
+                chartInstance.current = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: metric.name,
+                            data: chartData,
+                            backgroundColor: 'rgba(94, 186, 0, 0.7)',
+                            borderColor: '#5eba00',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: (context) => {
-                                            const point = context.raw;
-                                            return `${point.label}: (${point.x.toFixed(1)}, ${point.y.toFixed(1)})`;
-                                        }
-                                    }
-                                }
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#e9ecef' },
+                                ticks: { color: '#6c757d' }
                             },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: '#e9ecef' },
-                                    ticks: { color: '#6c757d' },
-                                    title: {
-                                        display: true,
-                                        text: metric.field2 || 'Secondary Metric'
-                                    }
-                                },
-                                x: {
-                                    beginAtZero: true,
-                                    grid: { color: '#e9ecef' },
-                                    ticks: { color: '#6c757d' },
-                                    title: {
-                                        display: true,
-                                        text: metric.field || 'Primary Metric'
-                                    }
-                                }
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#6c757d' }
                             }
                         }
-                    });
-
-                } else {
-                    // Single metric visualization (bar or line)
-                    const metricByCountry = {};
-                    
-                    data.forEach(row => {
-                        const country = row.ip_country || 'Unknown';
-                        
-                        if (!metricByCountry[country]) {
-                            metricByCountry[country] = { values: [], count: 0 };
-                        }
-
-                        let value = 0;
-                        if (metric.field === 'revenue') {
-                            try {
-                                const extraData = JSON.parse(row.extra_data || '{}');
-                                value = parseFloat(extraData.woocommerce_payment_amount || 0);
-                            } catch {}
-                        } else if (metric.field === 'engaged_time_inc') {
-                            value = parseInt(row.engaged_time_inc || 0);
-                        } else {
-                            try {
-                                const extraData = JSON.parse(row.extra_data || '{}');
-                                value = parseFloat(extraData[metric.field] || 0);
-                            } catch {}
-                        }
-
-                        metricByCountry[country].values.push(value);
-                        metricByCountry[country].count += 1;
-                    });
-
-                    const labels = Object.keys(metricByCountry).slice(0, 10);
-                    const chartData = labels.map(country => {
-                        const { values, count } = metricByCountry[country];
-                        
-                        switch (metric.metric_type) {
-                            case 'sum':
-                                return values.reduce((a, b) => a + b, 0);
-                            case 'average':
-                                return values.reduce((a, b) => a + b, 0) / count;
-                            case 'count':
-                                return count;
-                            case 'max':
-                                return Math.max(...values);
-                            case 'min':
-                                return Math.min(...values);
-                            default:
-                                return values.reduce((a, b) => a + b, 0);
-                        }
-                    });
-
-                    chartInstance.current = new Chart(ctx, {
-                        type: chartType === 'line' ? 'line' : 'bar',
-                        data: {
-                            labels,
-                            datasets: [{
-                                label: metric.name,
-                                data: chartData,
-                                backgroundColor: 'rgba(94, 186, 0, 0.7)',
-                                borderColor: '#5eba00',
-                                borderWidth: 2,
-                                borderRadius: chartType === 'bar' ? 8 : 0,
-                                tension: chartType === 'line' ? 0.4 : 0
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: '#e9ecef' },
-                                    ticks: { color: '#6c757d' }
-                                },
-                                x: {
-                                    grid: { display: chartType === 'line' },
-                                    ticks: { color: '#6c757d' }
-                                }
-                            }
-                        }
-                    });
-                }
+                    }
+                });
 
                 return () => {
                     if (chartInstance.current) {
@@ -1973,444 +1827,6 @@
 
         function JourneysView({ data }) {
             const sankeyRef = useRef(null);
-            const [expandedNode, setExpandedNode] = useState(null);
-
-            useEffect(() => {
-                if (!sankeyRef.current) return;
-
-                d3.select(sankeyRef.current).selectAll("*").remove();
-
-                // Build detailed journey data
-                const isExpanded = expandedNode !== null;
-                
-                let nodes = [];
-                let links = [];
-                
-                if (!isExpanded) {
-                    // Initial collapsed view
-                    nodes = [
-                        // Entry points (0-4)
-                        { name: "Direct", id: 0, expandable: true },
-                        { name: "Search", id: 1, expandable: true },
-                        { name: "Social", id: 2, expandable: true },
-                        { name: "Referral", id: 3, expandable: true },
-                        { name: "AI Bots", id: 4, expandable: false },
-                        // Landing pages (5-6)
-                        { name: "Homepage", id: 5 },
-                        { name: "Article Landing", id: 6 },
-                        // First article (7)
-                        { name: "1st Article", id: 7 },
-                        // Second article (8)
-                        { name: "2nd Article", id: 8 },
-                        // Third article (9)
-                        { name: "3rd Article", id: 9 },
-                        // Outcomes (10-11)
-                        { name: "Conversion\n$89.50 avg", id: 10 },
-                        { name: "Exit", id: 11 }
-                    ];
-
-                    links = [
-                        // Entry to Landing
-                        { source: 0, target: 5, value: 45 },
-                        { source: 1, target: 6, value: 55 },
-                        { source: 2, target: 6, value: 35 },
-                        { source: 3, target: 5, value: 25 },
-                        { source: 4, target: 6, value: 15 },
-                        
-                        // Landing to First Article
-                        { source: 5, target: 7, value: 50 },
-                        { source: 6, target: 7, value: 85 },
-                        
-                        // First to Second Article (some exit)
-                        { source: 7, target: 8, value: 75 },
-                        { source: 7, target: 11, value: 45 },
-                        
-                        // Second to Third Article (some exit, some convert)
-                        { source: 8, target: 9, value: 50 },
-                        { source: 8, target: 10, value: 15 },
-                        { source: 8, target: 11, value: 10 },
-                        
-                        // Third Article outcomes
-                        { source: 9, target: 10, value: 35 },
-                        { source: 9, target: 11, value: 15 }
-                    ];
-                } else if (expandedNode === 'Search') {
-                    // Expanded Search view
-                    nodes = [
-                        { name: "Google", id: 0 },
-                        { name: "Bing", id: 1 },
-                        { name: "DuckDuckGo", id: 2 },
-                        { name: "Other Search", id: 3 },
-                        { name: "Article Landing", id: 4 },
-                        { name: "1st Article", id: 5 },
-                        { name: "2nd Article", id: 6 },
-                        { name: "3rd Article", id: 7 },
-                        { name: "Conversion\n$89.50 avg", id: 8 },
-                        { name: "Exit", id: 9 }
-                    ];
-                    links = [
-                        { source: 0, target: 4, value: 40 },
-                        { source: 1, target: 4, value: 10 },
-                        { source: 2, target: 4, value: 3 },
-                        { source: 3, target: 4, value: 2 },
-                        { source: 4, target: 5, value: 45 },
-                        { source: 5, target: 6, value: 30 },
-                        { source: 5, target: 9, value: 15 },
-                        { source: 6, target: 7, value: 20 },
-                        { source: 6, target: 8, value: 7 },
-                        { source: 6, target: 9, value: 3 },
-                        { source: 7, target: 8, value: 15 },
-                        { source: 7, target: 9, value: 5 }
-                    ];
-                } else if (expandedNode === 'Social') {
-                    // Expanded Social view
-                    nodes = [
-                        { name: "Facebook", id: 0 },
-                        { name: "Twitter/X", id: 1 },
-                        { name: "LinkedIn", id: 2 },
-                        { name: "Instagram", id: 3 },
-                        { name: "Article Landing", id: 4 },
-                        { name: "1st Article", id: 5 },
-                        { name: "2nd Article", id: 6 },
-                        { name: "3rd Article", id: 7 },
-                        { name: "Conversion\n$89.50 avg", id: 8 },
-                        { name: "Exit", id: 9 }
-                    ];
-                    links = [
-                        { source: 0, target: 4, value: 15 },
-                        { source: 1, target: 4, value: 10 },
-                        { source: 2, target: 4, value: 7 },
-                        { source: 3, target: 4, value: 3 },
-                        { source: 4, target: 5, value: 28 },
-                        { source: 5, target: 6, value: 18 },
-                        { source: 5, target: 9, value: 10 },
-                        { source: 6, target: 7, value: 12 },
-                        { source: 6, target: 8, value: 4 },
-                        { source: 6, target: 9, value: 2 },
-                        { source: 7, target: 8, value: 9 },
-                        { source: 7, target: 9, value: 3 }
-                    ];
-                } else if (expandedNode === 'Direct') {
-                    // Expanded Direct view
-                    nodes = [
-                        { name: "Email Campaign", id: 0 },
-                        { name: "WhatsApp", id: 1 },
-                        { name: "SMS", id: 2 },
-                        { name: "Bookmark", id: 3 },
-                        { name: "Homepage", id: 4 },
-                        { name: "1st Article", id: 5 },
-                        { name: "2nd Article", id: 6 },
-                        { name: "3rd Article", id: 7 },
-                        { name: "Conversion\n$89.50 avg", id: 8 },
-                        { name: "Exit", id: 9 }
-                    ];
-                    links = [
-                        { source: 0, target: 4, value: 20 },
-                        { source: 1, target: 4, value: 15 },
-                        { source: 2, target: 4, value: 7 },
-                        { source: 3, target: 4, value: 3 },
-                        { source: 4, target: 5, value: 38 },
-                        { source: 5, target: 6, value: 25 },
-                        { source: 5, target: 9, value: 13 },
-                        { source: 6, target: 7, value: 17 },
-                        { source: 6, target: 8, value: 6 },
-                        { source: 6, target: 9, value: 2 },
-                        { source: 7, target: 8, value: 12 },
-                        { source: 7, target: 9, value: 5 }
-                    ];
-                } else if (expandedNode === 'Referral') {
-                    // Expanded Referral view
-                    nodes = [
-                        { name: "News Sites", id: 0 },
-                        { name: "Blogs", id: 1 },
-                        { name: "Forums", id: 2 },
-                        { name: "Partners", id: 3 },
-                        { name: "Homepage", id: 4 },
-                        { name: "1st Article", id: 5 },
-                        { name: "2nd Article", id: 6 },
-                        { name: "3rd Article", id: 7 },
-                        { name: "Conversion\n$89.50 avg", id: 8 },
-                        { name: "Exit", id: 9 }
-                    ];
-                    links = [
-                        { source: 0, target: 4, value: 12 },
-                        { source: 1, target: 4, value: 8 },
-                        { source: 2, target: 4, value: 3 },
-                        { source: 3, target: 4, value: 2 },
-                        { source: 4, target: 5, value: 20 },
-                        { source: 5, target: 6, value: 13 },
-                        { source: 5, target: 9, value: 7 },
-                        { source: 6, target: 7, value: 9 },
-                        { source: 6, target: 8, value: 3 },
-                        { source: 6, target: 9, value: 1 },
-                        { source: 7, target: 8, value: 7 },
-                        { source: 7, target: 9, value: 2 }
-                    ];
-                }
-
-                const width = sankeyRef.current.clientWidth;
-                const height = 600;
-                const margin = { top: 20, right: 180, bottom: 20, left: 180 };
-
-                const svg = d3.select(sankeyRef.current)
-                    .append("svg")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .append("g")
-                    .attr("transform", `translate(${margin.left},${margin.top})`);
-
-                const nodeWidth = 25;
-                const nodeHeight = 50;
-                const numStages = isExpanded ? 6 : 6;
-                const stageWidth = (width - margin.left - margin.right - nodeWidth * numStages) / (numStages - 1);
-
-                // Position nodes based on view
-                let positionedNodes = [];
-                
-                if (!isExpanded) {
-                    positionedNodes = [
-                        { name: "Direct", x: 0, y: 80, clickable: true },
-                        { name: "Search", x: 0, y: 160, clickable: true },
-                        { name: "Social", x: 0, y: 240, clickable: true },
-                        { name: "Referral", x: 0, y: 320, clickable: true },
-                        { name: "AI Bots", x: 0, y: 400, clickable: false },
-                        { name: "Homepage", x: stageWidth, y: 150 },
-                        { name: "Article Landing", x: stageWidth, y: 280 },
-                        { name: "1st Article", x: stageWidth * 2, y: 220 },
-                        { name: "2nd Article", x: stageWidth * 3, y: 220 },
-                        { name: "3rd Article", x: stageWidth * 4, y: 220 },
-                        { name: "Conversion\n$89.50 avg", x: stageWidth * 5, y: 170 },
-                        { name: "Exit", x: stageWidth * 5, y: 300 }
-                    ];
-                } else {
-                    // Expanded view layout
-                    const baseY = 100;
-                    const spacing = 60;
-                    positionedNodes = nodes.map((node, idx) => {
-                        if (idx < 4) {
-                            return { name: node.name, x: 0, y: baseY + idx * spacing };
-                        } else if (idx === 4) {
-                            return { name: node.name, x: stageWidth, y: 220 };
-                        } else if (idx < 8) {
-                            return { name: node.name, x: stageWidth * (idx - 3), y: 220 };
-                        } else {
-                            return { name: node.name, x: stageWidth * 5, y: idx === 8 ? 170 : 300 };
-                        }
-                    });
-                }
-
-                const color = d3.scaleOrdinal()
-                    .range([
-                        '#5eba00', '#0066cc', '#ff6b35', '#6a4c93', '#17a2b8',
-                        '#ffc107', '#28a745', '#20c997', '#17a2b8', '#5eba00', '#dc3545'
-                    ]);
-
-                const link = d3.linkHorizontal()
-                    .x(d => d.x)
-                    .y(d => d.y);
-
-                // Draw links
-                svg.append("g")
-                    .selectAll("path")
-                    .data(links)
-                    .join("path")
-                    .attr("d", d => {
-                        const sourceNode = positionedNodes[d.source];
-                        const targetNode = positionedNodes[d.target];
-                        return link({
-                            source: { x: sourceNode.x + nodeWidth, y: sourceNode.y + nodeHeight / 2 },
-                            target: { x: targetNode.x, y: targetNode.y + nodeHeight / 2 }
-                        });
-                    })
-                    .attr("stroke", d => {
-                        const targetIdx = positionedNodes.length - 2;
-                        return d.target === targetIdx ? '#5eba00' : color(d.source);
-                    })
-                    .attr("stroke-width", d => Math.max(2, d.value / 4))
-                    .attr("fill", "none")
-                    .attr("opacity", d => {
-                        const targetIdx = positionedNodes.length - 2;
-                        return d.target === targetIdx ? 0.7 : 0.4;
-                    })
-                    .on("mouseover", function(event, d) {
-                        d3.select(this)
-                            .attr("opacity", 0.9)
-                            .attr("stroke-width", Math.max(3, d.value / 3));
-                        
-                        const sourceNode = positionedNodes[d.source];
-                        const targetNode = positionedNodes[d.target];
-                        
-                        svg.append("text")
-                            .attr("class", "link-label")
-                            .attr("x", (sourceNode.x + targetNode.x) / 2)
-                            .attr("y", (sourceNode.y + targetNode.y) / 2 - 10)
-                            .attr("text-anchor", "middle")
-                            .style("font-size", "12px")
-                            .style("font-weight", "700")
-                            .style("fill", "#212529")
-                            .text(`${d.value} users`);
-                    })
-                    .on("mouseout", function(event, d) {
-                        const targetIdx = positionedNodes.length - 2;
-                        d3.select(this)
-                            .attr("opacity", d.target === targetIdx ? 0.7 : 0.4)
-                            .attr("stroke-width", Math.max(2, d.value / 4));
-                        
-                        svg.selectAll(".link-label").remove();
-                    });
-
-                // Draw nodes
-                const nodeGroups = svg.append("g")
-                    .selectAll("g")
-                    .data(positionedNodes)
-                    .join("g")
-                    .attr("transform", d => `translate(${d.x},${d.y})`)
-                    .style("cursor", d => d.clickable ? "pointer" : "default")
-                    .on("click", function(event, d) {
-                        if (d.clickable) {
-                            setExpandedNode(expandedNode === d.name ? null : d.name);
-                        }
-                    });
-
-                nodeGroups.append("rect")
-                    .attr("width", nodeWidth)
-                    .attr("height", nodeHeight)
-                    .attr("fill", (d, i) => color(i))
-                    .attr("opacity", d => d.clickable ? 0.9 : 0.9)
-                    .attr("rx", 6)
-                    .style("stroke", (d, i) => {
-                        if (i === positionedNodes.length - 2) return "#5eba00";
-                        if (d.clickable) return "#fff";
-                        return "none";
-                    })
-                    .style("stroke-width", d => d.clickable ? "2" : "3");
-
-                // Add click indicator for expandable nodes
-                nodeGroups.filter(d => d.clickable)
-                    .append("text")
-                    .attr("x", nodeWidth / 2)
-                    .attr("y", nodeHeight / 2)
-                    .attr("text-anchor", "middle")
-                    .attr("dy", "0.35em")
-                    .style("font-size", "16px")
-                    .style("fill", "#fff")
-                    .style("pointer-events", "none")
-                    .text("▸");
-
-                nodeGroups.append("text")
-                    .attr("x", nodeWidth + 10)
-                    .attr("y", nodeHeight / 2)
-                    .attr("dy", "0.35em")
-                    .attr("text-anchor", "start")
-                    .style("font-size", (d, i) => i === positionedNodes.length - 2 ? "13px" : "12px")
-                    .style("font-weight", (d, i) => i === positionedNodes.length - 2 ? "700" : "600")
-                    .style("fill", "#212529")
-                    .style("pointer-events", "none")
-                    .each(function(d) {
-                        const lines = d.name.split('\n');
-                        const text = d3.select(this);
-                        lines.forEach((line, i) => {
-                            text.append("tspan")
-                                .attr("x", nodeWidth + 10)
-                                .attr("dy", i === 0 ? 0 : "1.2em")
-                                .text(line);
-                        });
-                    });
-
-                // Add stage labels
-                if (!isExpanded) {
-                    const stages = [
-                        { x: 0, label: "Entry" },
-                        { x: stageWidth, label: "Landing" },
-                        { x: stageWidth * 2, label: "Engagement" },
-                        { x: stageWidth * 3, label: "Deep Read" },
-                        { x: stageWidth * 4, label: "Committed" },
-                        { x: stageWidth * 5, label: "Outcome" }
-                    ];
-
-                    svg.append("g")
-                        .selectAll("text")
-                        .data(stages)
-                        .join("text")
-                        .attr("x", d => d.x + nodeWidth / 2)
-                        .attr("y", 10)
-                        .attr("text-anchor", "middle")
-                        .style("font-size", "11px")
-                        .style("font-weight", "700")
-                        .style("fill", "#6c757d")
-                        .style("text-transform", "uppercase")
-                        .style("letter-spacing", "0.5px")
-                        .text(d => d.label);
-                }
-
-                // Add back button for expanded views
-                if (isExpanded) {
-                    svg.append("text")
-                        .attr("x", -50)
-                        .attr("y", 30)
-                        .attr("text-anchor", "middle")
-                        .style("font-size", "14px")
-                        .style("font-weight", "700")
-                        .style("fill", "#5eba00")
-                        .style("cursor", "pointer")
-                        .text("← Back")
-                        .on("click", () => setExpandedNode(null));
-                }
-
-            }, [data, expandedNode]);
-
-            return (
-                <>
-                    <div className="header">
-                        <h1 className="page-title">User Journey Analysis</h1>
-                        <p style={{color: 'var(--parsely-gray-600)', marginTop: '0.5rem'}}>
-                            {expandedNode ? `Detailed view: ${expandedNode}` : 'Click on entry points to see details'}
-                        </p>
-                    </div>
-
-                    <div className="content-section">
-                        <div style={{marginBottom: '1.5rem', padding: '1rem', background: 'var(--parsely-green-light)', border: '1px solid var(--parsely-green)', borderRadius: '8px'}}>
-                            <div style={{display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap'}}>
-                                <div>
-                                    <div style={{fontSize: '0.75rem', fontWeight: '600', color: 'var(--parsely-gray-700)', textTransform: 'uppercase', marginBottom: '0.25rem'}}>
-                                        Conversion Rate
-                                    </div>
-                                    <div style={{fontSize: '1.5rem', fontWeight: '700', color: 'var(--parsely-green-dark)'}}>
-                                        28.5%
-                                    </div>
-                                </div>
-                                <div>
-                                    <div style={{fontSize: '0.75rem', fontWeight: '600', color: 'var(--parsely-gray-700)', textTransform: 'uppercase', marginBottom: '0.25rem'}}>
-                                        Avg Order Value
-                                    </div>
-                                    <div style={{fontSize: '1.5rem', fontWeight: '700', color: 'var(--parsely-green-dark)'}}>
-                                        $89.50
-                                    </div>
-                                </div>
-                                <div>
-                                    <div style={{fontSize: '0.75rem', fontWeight: '600', color: 'var(--parsely-gray-700)', textTransform: 'uppercase', marginBottom: '0.25rem'}}>
-                                        Avg Articles Before Conversion
-                                    </div>
-                                    <div style={{fontSize: '1.5rem', fontWeight: '700', color: 'var(--parsely-green-dark)'}}>
-                                        2.8
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {!expandedNode && (
-                            <div style={{marginBottom: '1rem', padding: '0.75rem', background: 'var(--parsely-blue-light)', border: '1px solid var(--parsely-blue)', borderRadius: '8px', textAlign: 'center'}}>
-                                <span style={{fontSize: '0.875rem', color: 'var(--parsely-blue)'}}>
-                                    💡 <strong>Tip:</strong> Click on Direct, Search, Social, or Referral to see detailed breakdowns
-                                </span>
-                            </div>
-                        )}
-                        
-                        <div className="sankey-container" ref={sankeyRef}></div>
-                    </div>
-                </>
-            );
-        }
 
             useEffect(() => {
                 if (!sankeyRef.current) return;
@@ -2419,48 +1835,50 @@
 
                 // Build realistic conversion journey
                 const nodes = [
-                    // Entry points (0-3)
+                    // Entry points (0-4) - ADDED AI BOTS
                     { name: "Direct", id: 0 },
                     { name: "Search", id: 1 },
                     { name: "Social", id: 2 },
                     { name: "Referral", id: 3 },
-                    // Landing pages (4-5)
-                    { name: "Homepage", id: 4 },
-                    { name: "Article Landing", id: 5 },
-                    // First article (6)
-                    { name: "1st Article", id: 6 },
-                    // Second article (7)
-                    { name: "2nd Article", id: 7 },
-                    // Third article (8)
-                    { name: "3rd Article", id: 8 },
-                    // Outcomes (9-10)
-                    { name: "Conversion\n$89.50 avg", id: 9 },
-                    { name: "Exit", id: 10 }
+                    { name: "AI Bots", id: 4 },
+                    // Landing pages (5-6)
+                    { name: "Homepage", id: 5 },
+                    { name: "Article Landing", id: 6 },
+                    // First article (7)
+                    { name: "1st Article", id: 7 },
+                    // Second article (8)
+                    { name: "2nd Article", id: 8 },
+                    // Third article (9)
+                    { name: "3rd Article", id: 9 },
+                    // Outcomes (10-11)
+                    { name: "Conversion\n$89.50 avg", id: 10 },
+                    { name: "Exit", id: 11 }
                 ];
 
                 const links = [
                     // Entry to Landing
-                    { source: 0, target: 4, value: 45 },  // Direct -> Homepage
-                    { source: 1, target: 5, value: 55 },  // Search -> Article
-                    { source: 2, target: 5, value: 35 },  // Social -> Article
-                    { source: 3, target: 4, value: 25 },  // Referral -> Homepage
+                    { source: 0, target: 5, value: 45 },  // Direct -> Homepage
+                    { source: 1, target: 6, value: 55 },  // Search -> Article
+                    { source: 2, target: 6, value: 35 },  // Social -> Article
+                    { source: 3, target: 5, value: 25 },  // Referral -> Homepage
+                    { source: 4, target: 6, value: 15 },  // AI Bots -> Article
                     
                     // Landing to First Article
-                    { source: 4, target: 6, value: 50 },  // Homepage -> 1st Article
-                    { source: 5, target: 6, value: 70 },  // Article Landing -> 1st Article
+                    { source: 5, target: 7, value: 50 },  // Homepage -> 1st Article
+                    { source: 6, target: 7, value: 85 },  // Article Landing -> 1st Article (55+35+15)
                     
                     // First to Second Article (some exit)
-                    { source: 6, target: 7, value: 75 },  // 1st -> 2nd Article
-                    { source: 6, target: 10, value: 45 }, // 1st -> Exit
+                    { source: 7, target: 8, value: 75 },  // 1st -> 2nd Article
+                    { source: 7, target: 11, value: 45 }, // 1st -> Exit
                     
                     // Second to Third Article (some exit, some convert)
-                    { source: 7, target: 8, value: 50 },  // 2nd -> 3rd Article
-                    { source: 7, target: 9, value: 15 },  // 2nd -> Conversion
-                    { source: 7, target: 10, value: 10 }, // 2nd -> Exit
+                    { source: 8, target: 9, value: 50 },  // 2nd -> 3rd Article
+                    { source: 8, target: 10, value: 15 },  // 2nd -> Conversion
+                    { source: 8, target: 11, value: 10 }, // 2nd -> Exit
                     
                     // Third Article outcomes (more likely to convert)
-                    { source: 8, target: 9, value: 35 },  // 3rd -> Conversion
-                    { source: 8, target: 10, value: 15 }  // 3rd -> Exit
+                    { source: 9, target: 10, value: 35 },  // 3rd -> Conversion
+                    { source: 9, target: 11, value: 15 }  // 3rd -> Exit
                 ];
 
                 const width = sankeyRef.current.clientWidth;
@@ -2480,28 +1898,29 @@
 
                 // Position nodes in journey stages
                 const positionedNodes = [
-                    // Stage 1: Entry (0-3)
-                    { name: "Direct", x: 0, y: 100 },
-                    { name: "Search", x: 0, y: 180 },
-                    { name: "Social", x: 0, y: 260 },
-                    { name: "Referral", x: 0, y: 340 },
+                    // Stage 1: Entry (0-4) - NOW WITH AI BOTS
+                    { name: "Direct", x: 0, y: 80 },
+                    { name: "Search", x: 0, y: 160 },
+                    { name: "Social", x: 0, y: 240 },
+                    { name: "Referral", x: 0, y: 320 },
+                    { name: "AI Bots", x: 0, y: 400 },
                     
-                    // Stage 2: Landing (4-5)
-                    { name: "Homepage", x: stageWidth, y: 150 },
-                    { name: "Article Landing", x: stageWidth, y: 250 },
+                    // Stage 2: Landing (5-6)
+                    { name: "Homepage", x: stageWidth, y: 170 },
+                    { name: "Article Landing", x: stageWidth, y: 300 },
                     
-                    // Stage 3: First Article (6)
-                    { name: "1st Article", x: stageWidth * 2, y: 200 },
+                    // Stage 3: First Article (7)
+                    { name: "1st Article", x: stageWidth * 2, y: 240 },
                     
-                    // Stage 4: Second Article (7)
-                    { name: "2nd Article", x: stageWidth * 3, y: 200 },
+                    // Stage 4: Second Article (8)
+                    { name: "2nd Article", x: stageWidth * 3, y: 240 },
                     
-                    // Stage 5: Third Article (8)
-                    { name: "3rd Article", x: stageWidth * 4, y: 200 },
+                    // Stage 5: Third Article (9)
+                    { name: "3rd Article", x: stageWidth * 4, y: 240 },
                     
-                    // Stage 6: Outcomes (9-10)
-                    { name: "Conversion\n$89.50 avg", x: stageWidth * 5, y: 150 },
-                    { name: "Exit", x: stageWidth * 5, y: 300 }
+                    // Stage 6: Outcomes (10-11)
+                    { name: "Conversion\n$89.50 avg", x: stageWidth * 5, y: 190 },
+                    { name: "Exit", x: stageWidth * 5, y: 320 }
                 ];
 
                 const color = d3.scaleOrdinal()
@@ -2510,11 +1929,12 @@
                         '#0066cc', // Search - blue
                         '#ff6b35', // Social - orange
                         '#6a4c93', // Referral - purple
-                        '#17a2b8', // Homepage - teal
-                        '#ffc107', // Article Landing - yellow
-                        '#28a745', // 1st Article - green
-                        '#20c997', // 2nd Article - teal
-                        '#17a2b8', // 3rd Article - cyan
+                        '#17a2b8', // AI Bots - teal
+                        '#ffc107', // Homepage - yellow
+                        '#28a745', // Article Landing - green
+                        '#20c997', // 1st Article - teal
+                        '#17a2b8', // 2nd Article - cyan
+                        '#6a4c93', // 3rd Article - purple
                         '#5eba00', // Conversion - Parse.ly green (highlighted)
                         '#dc3545'  // Exit - red
                     ]);
