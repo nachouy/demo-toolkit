@@ -65,19 +65,15 @@
             box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
         }
 
-        .back-home-container {
-            position: absolute;
+        .back-home-btn {
+            position: fixed;
             top: 1.5rem;
             right: 1.5rem;
-            z-index: 1000;
-        }
-
-        .back-home-btn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             padding: 0.625rem 1rem;
-            background: var(--parsely-gray-100);
+            background: white;
             color: var(--parsely-gray-700);
             text-decoration: none;
             border-radius: 8px;
@@ -86,6 +82,8 @@
             transition: all 0.2s ease;
             border: 1px solid var(--parsely-gray-300);
             white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .back-home-btn:hover {
@@ -93,7 +91,7 @@
             color: white;
             border-color: var(--parsely-green);
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(94, 186, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(94, 186, 0, 0.3);
         }
 
         .logo-container {
@@ -947,9 +945,13 @@
             };
 
             return (
-                <div className="app-layout">
-                    <Sidebar activeView={activeView} setActiveView={setActiveView} />
-                    <main className="main-content">
+                <>
+                    <a href="index.html" className="back-home-btn">
+                        ← Home
+                    </a>
+                    <div className="app-layout">
+                        <Sidebar activeView={activeView} setActiveView={setActiveView} />
+                        <main className="main-content">
                         {!dataLoaded ? (
                             <div className="content-section">
                                 {loading ? (
@@ -984,6 +986,7 @@
                         )}
                     </main>
                 </div>
+                </>
             );
         }
 
@@ -1034,12 +1037,6 @@
 
             return (
                 <aside className="sidebar">
-                    <div className="back-home-container">
-                        <a href="index.html" className="back-home-btn">
-                            ← Home
-                        </a>
-                    </div>
-                    
                     <div className="logo-container">
                         <div className="logo">
                             <div className="logo-icon">P</div>
