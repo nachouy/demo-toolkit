@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parse.ly Personalization Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --parsely-green: #00d084;
+      --parsely-dark: #0a2540;
+      --parsely-blue: #0066ff;
+      --bg-white: #ffffff;
+      --bg-light: #f7f9fc;
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --border-color: #e5e7eb;
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-light);
+      color: var(--text-primary);
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .logo {
+      height: 32px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .controls {
+      background: var(--bg-white);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      margin: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--parsely-green);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #00b872;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: var(--bg-light);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: white;
+    }
+
+    .steps-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .step {
+      background: var(--bg-white);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow-md);
+      text-align: center;
+      position: relative;
+      opacity: 0.3;
+      transform: scale(0.95);
+      transition: all 0.5s ease;
+    }
+
+    .step.active {
+      opacity: 1;
+      transform: scale(1);
+      border: 2px solid var(--parsely-green);
+      box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.1);
+    }
+
+    .step.completed {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .step-number {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--bg-light);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0 auto 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .step.active .step-number {
+      background: var(--parsely-green);
+      color: white;
+      animation: pulse 2s infinite;
+    }
+
+    .step.completed .step-number {
+      background: var(--parsely-green);
+      color: white;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .step-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .step-description {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .visualization {
+      background: var(--bg-white);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+    }
+
+    .viz-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+    }
+
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: var(--bg-light);
+      border-radius: 8px;
+    }
+
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--parsely-green);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .user-uuid {
+      font-family: 'Monaco', monospace;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      background: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .article-card {
+      background: white;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .article-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--parsely-green);
+    }
+
+    .article-card.reading {
+      animation: reading 1s ease-in-out;
+      border-color: var(--parsely-green);
+      background: rgba(0, 208, 132, 0.05);
+    }
+
+    @keyframes reading {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .article-card.read {
+      opacity: 0.6;
+      border-color: var(--parsely-green);
+    }
+
+    .article-card.recommended {
+      animation: slideIn 0.5s ease-out;
+      border-color: var(--parsely-blue);
+      background: rgba(0, 102, 255, 0.05);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .article-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: var(--bg-light);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-right: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .article-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      margin: 0.75rem 0 0.5rem;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .article-section {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge.read {
+      background: var(--parsely-green);
+      color: white;
+    }
+
+    .badge.recommended {
+      background: var(--parsely-blue);
+      color: white;
+    }
+
+    .profile-visualization {
+      background: var(--bg-light);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .interest-bars {
+      margin-top: 1rem;
+    }
+
+    .interest-item {
+      margin-bottom: 1rem;
+    }
+
+    .interest-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .interest-bar {
+      height: 24px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .interest-fill {
+      height: 100%;
+      background: var(--parsely-green);
+      transition: width 1s ease;
+      display: flex;
+      align-items: center;
+      padding: 0 0.75rem;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .timeline {
+      position: relative;
+      padding: 2rem 0;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: fadeInLeft 0.5s ease-out forwards;
+    }
+
+    @keyframes fadeInLeft {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .timeline-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--parsely-green);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.25rem;
+    }
+
+    .timeline-content {
+      flex: 1;
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-description {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'Monaco', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    .code-comment {
+      color: #6a9955;
+    }
+
+    .code-string {
+      color: #ce9178;
+    }
+
+    .code-keyword {
+      color: #569cd6;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--parsely-green);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .instruction-card {
+      background: linear-gradient(135deg, rgba(0, 208, 132, 0.1) 0%, rgba(0, 102, 255, 0.1) 100%);
+      border: 2px solid var(--parsely-green);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .instruction-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .instruction-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--parsely-green);
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .instruction-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .instruction-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .instruction-list li {
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background: white;
+      border-radius: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .instruction-list li::before {
+      content: '▸';
+      color: var(--parsely-green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .instruction-note {
+      background: white;
+      border-left: 3px solid var(--parsely-blue);
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .instruction-note strong {
+      color: var(--parsely-blue);
+    }
+
+    @media (max-width: 968px) {
+      .steps-container {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .user-section {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://www.parse.ly/wp-content/uploads/sites/6/2023/12/parsely-logo.svg" alt="Parse.ly" class="logo">
+    <h1>Personalization Demo</h1>
+    <p class="subtitle">See how Parse.ly's AI learns user preferences and delivers personalized content recommendations</p>
+  </div>
+
+  <div class="demo-container">
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn btn-primary" onclick="startDemo()">▶ Start Demo</button>
+      <button class="btn btn-secondary" onclick="resetDemo()">↻ Reset</button>
+      <button class="btn btn-secondary" onclick="skipToRecommendations()">⏭ Skip to Recommendations</button>
+    </div>
+
+    <!-- Steps -->
+    <div class="steps-container">
+      <div class="step" id="step1">
+        <div class="step-number">1</div>
+        <div class="step-title">User Reads Articles</div>
+        <div class="step-description">When a user reads an article, fire a request to /profile with their UUID and the article URL. Parse.ly learns their interests.</div>
+      </div>
+      <div class="step" id="step2">
+        <div class="step-number">2</div>
+        <div class="step-title">Profile Building</div>
+        <div class="step-description">Parse.ly's AI analyzes the articles and builds an interest profile linked to the UUID. No personal data needed!</div>
+      </div>
+      <div class="step" id="step3">
+        <div class="step-number">3</div>
+        <div class="step-title">Get Recommendations</div>
+        <div class="step-description">Call /related with the UUID to get personalized recommendations JSON. Use this data to build widgets, populate feeds, or generate personalized emails!</div>
+      </div>
+    </div>
+
+    <!-- User Info -->
+    <div class="visualization">
+      <div class="user-section">
+        <div class="user-avatar">👤</div>
+        <div class="user-info">
+          <div class="user-name">Sarah Thompson</div>
+          <div class="user-uuid">UUID: user-sarah-123</div>
+          <div style="margin-top: 0.5rem; padding: 0.75rem; background: rgba(0, 208, 132, 0.1); border-radius: 6px; border-left: 3px solid var(--parsely-green);">
+            <div style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
+              <strong style="color: var(--parsely-green);">🔒 Privacy First:</strong> Parse.ly only knows the UUID "user-sarah-123". 
+              It doesn't know if this is Sarah, Mario, or an anonymous visitor. No personal data is required!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Available Articles -->
+      <div id="availableArticles">
+        <div class="viz-title">📰 Available Articles - Click to Read</div>
+        <div class="articles-grid" id="articlesGrid"></div>
+      </div>
+
+      <!-- User Profile -->
+      <div id="userProfile" style="display: none;">
+        <div class="viz-title">🧠 Interest Profile for UUID: user-sarah-123</div>
+        <div class="profile-visualization">
+          <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            Based on the articles this UUID has read, Parse.ly's AI has learned these interests. 
+            <strong style="color: var(--parsely-green);">Parse.ly doesn't know who this person is</strong> - just what topics they like!
+          </p>
+          <div class="interest-bars" id="interestBars"></div>
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div id="recommendations" style="display: none;">
+        <div class="viz-title">✨ Personalized Recommendations for UUID: user-sarah-123</div>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+          Based on this UUID's reading history, here are articles they're likely to enjoy. 
+          Already-read articles are automatically excluded.
+        </p>
+        <div class="articles-grid" id="recommendationsGrid"></div>
+      </div>
+
+      <!-- API Calls Timeline -->
+      <div id="apiTimeline" style="display: none;">
+        <div class="viz-title">🔧 API Calls Made</div>
+        <div class="timeline" id="timelineContent"></div>
+      </div>
+
+      <!-- Stats -->
+      <div id="stats" style="display: none;">
+        <div class="viz-title">📊 Impact Metrics</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="statArticles">0</div>
+            <div class="stat-label">Articles Read</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="statInterests">0</div>
+            <div class="stat-label">Interests Identified</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="statRecommendations">0</div>
+            <div class="stat-label">Recommendations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Article database - Expanded with balanced categories
+    const articles = [
+      // Technology (6 articles)
+      { id: 1, title: "AI Revolutionizes Healthcare Diagnostics", section: "Technology", tags: ["AI", "Healthcare", "Innovation"] },
+      { id: 2, title: "Machine Learning Basics for Beginners", section: "Technology", tags: ["AI", "Education", "Programming"] },
+      { id: 3, title: "Understanding Neural Networks", section: "Technology", tags: ["AI", "Science", "Deep Learning"] },
+      { id: 4, title: "The Future of Electric Vehicles", section: "Technology", tags: ["EV", "Innovation", "Sustainability"] },
+      { id: 5, title: "Quantum Computing Breakthrough", section: "Technology", tags: ["Computing", "Science", "Innovation"] },
+      { id: 6, title: "5G Networks Transform Cities", section: "Technology", tags: ["Telecom", "Infrastructure", "Innovation"] },
+      
+      // Environment (6 articles)
+      { id: 7, title: "Climate Change: What You Need to Know", section: "Environment", tags: ["Climate", "Science", "Policy"] },
+      { id: 8, title: "Ocean Conservation Efforts", section: "Environment", tags: ["Climate", "Wildlife", "Oceans"] },
+      { id: 9, title: "Renewable Energy Trends 2024", section: "Environment", tags: ["Energy", "Climate", "Innovation"] },
+      { id: 10, title: "Protecting Endangered Species", section: "Environment", tags: ["Wildlife", "Conservation", "Nature"] },
+      { id: 11, title: "Sustainable Agriculture Methods", section: "Environment", tags: ["Farming", "Sustainability", "Food"] },
+      { id: 12, title: "Fighting Plastic Pollution", section: "Environment", tags: ["Sustainability", "Oceans", "Policy"] },
+      
+      // Lifestyle (6 articles)
+      { id: 13, title: "Top 10 Sustainable Living Tips", section: "Lifestyle", tags: ["Sustainability", "Home", "Wellness"] },
+      { id: 14, title: "Cooking with Seasonal Vegetables", section: "Lifestyle", tags: ["Food", "Health", "Recipes"] },
+      { id: 15, title: "Meditation for Busy Professionals", section: "Lifestyle", tags: ["Wellness", "Mental Health", "Productivity"] },
+      { id: 16, title: "Home Fitness: No Equipment Needed", section: "Lifestyle", tags: ["Fitness", "Health", "Home"] },
+      { id: 17, title: "Minimalist Living Guide", section: "Lifestyle", tags: ["Home", "Wellness", "Simplicity"] },
+      { id: 18, title: "Plant-Based Diet Benefits", section: "Lifestyle", tags: ["Food", "Health", "Sustainability"] },
+      
+      // Finance/Business (6 articles)
+      { id: 19, title: "Stock Market Analysis Today", section: "Finance", tags: ["Investing", "Markets", "Economy"] },
+      { id: 20, title: "Startup Funding Guide 2024", section: "Business", tags: ["Startups", "Finance", "Entrepreneurship"] },
+      { id: 21, title: "Cryptocurrency Investment Basics", section: "Finance", tags: ["Crypto", "Investing", "Technology"] },
+      { id: 22, title: "Building a Business Plan", section: "Business", tags: ["Entrepreneurship", "Planning", "Startups"] },
+      { id: 23, title: "Personal Finance Tips for 2024", section: "Finance", tags: ["Money", "Savings", "Planning"] },
+      { id: 24, title: "Remote Work Revolution", section: "Business", tags: ["Work", "Technology", "Productivity"] }
+    ];
+
+    let readArticles = [];
+    let currentStep = 0;
+    let demoRunning = false;
+    let interests = {};
+
+    function initDemo() {
+      renderArticles();
+    }
+
+    function renderArticles() {
+      const grid = document.getElementById('articlesGrid');
+      grid.innerHTML = articles.map(article => `
+        <div class="article-card" onclick="readArticle(${article.id})" id="article-${article.id}">
+          <div class="article-section">${article.section}</div>
+          <div class="article-title">${article.title}</div>
+          <div>
+            ${article.tags.map(tag => `<span class="article-tag">${tag}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function readArticle(id) {
+      if (demoRunning) return;
+      
+      const article = articles.find(a => a.id === id);
+      if (!article || readArticles.includes(id)) return;
+
+      // Animate reading
+      const card = document.getElementById(`article-${id}`);
+      card.classList.add('reading');
+      
+      setTimeout(() => {
+        card.classList.remove('reading');
+        card.classList.add('read');
+        card.innerHTML += '<div class="badge read">✓ Read</div>';
+        
+        readArticles.push(id);
+        
+        // Update interests
+        updateInterests(article);
+        
+        // Add to timeline
+        addToTimeline('profile', article);
+        
+        // Update stats
+        updateStats();
+        
+        // Show profile if 2+ articles read
+        if (readArticles.length >= 2) {
+          showUserProfile();
+        }
+        
+        // Show recommendations if 3+ articles read
+        if (readArticles.length >= 3) {
+          setTimeout(() => showRecommendations(), 1000);
+        }
+      }, 1000);
+    }
+
+    function updateInterests(article) {
+      // Add section interest
+      interests[article.section] = (interests[article.section] || 0) + 1;
+      
+      // Add tag interests
+      article.tags.forEach(tag => {
+        interests[tag] = (interests[tag] || 0) + 1;
+      });
+    }
+
+    function showUserProfile() {
+      document.getElementById('userProfile').style.display = 'block';
+      setStep(2);
+      
+      const barsContainer = document.getElementById('interestBars');
+      const sortedInterests = Object.entries(interests).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      const maxCount = Math.max(...sortedInterests.map(i => i[1]));
+      
+      barsContainer.innerHTML = sortedInterests.map(([interest, count]) => {
+        const percentage = (count / maxCount) * 100;
+        return `
+          <div class="interest-item">
+            <div class="interest-label">
+              <span><strong>${interest}</strong></span>
+              <span>${count} article${count > 1 ? 's' : ''}</span>
+            </div>
+            <div class="interest-bar">
+              <div class="interest-fill" style="width: ${percentage}%">${Math.round(percentage)}%</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showRecommendations() {
+      document.getElementById('recommendations').style.display = 'block';
+      document.getElementById('apiTimeline').style.display = 'block';
+      setStep(3);
+      
+      // Get recommendations based on interests
+      const recommended = getRecommendations();
+      
+      const grid = document.getElementById('recommendationsGrid');
+      grid.innerHTML = recommended.map((article, index) => `
+        <div class="article-card recommended" style="animation-delay: ${index * 0.1}s" id="rec-${article.id}">
+          <div class="badge recommended">★ Recommended</div>
+          <div class="article-section">${article.section}</div>
+          <div class="article-title">${article.title}</div>
+          <div>
+            ${article.tags.map(tag => `<span class="article-tag">${tag}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+      
+      // Add to timeline
+      addToTimeline('related', null, recommended.length);
+      
+      // Update stats
+      document.getElementById('statRecommendations').textContent = recommended.length;
+    }
+
+    function getRecommendations() {
+      // Get sections that user has read
+      const readSections = {};
+      readArticles.forEach(id => {
+        const article = articles.find(a => a.id === id);
+        if (article) {
+          readSections[article.section] = (readSections[article.section] || 0) + 1;
+        }
+      });
+      
+      // Get unread articles
+      const unreadArticles = articles.filter(a => !readArticles.includes(a.id));
+      
+      // Score and filter recommendations
+      const scoredArticles = unreadArticles
+        .map(article => {
+          let score = 0;
+          
+          // Heavy weight for matching section (user clearly interested)
+          if (interests[article.section]) {
+            score += interests[article.section] * 20;
+          }
+          
+          // Weight for matching tags
+          article.tags.forEach(tag => {
+            if (interests[tag]) {
+              score += interests[tag] * 10;
+            }
+          });
+          
+          return { ...article, score };
+        })
+        .filter(article => article.score > 0) // Only recommend if there's interest
+        .sort((a, b) => b.score - a.score);
+      
+      // Return top 5-6 recommendations
+      return scoredArticles.slice(0, 6);
+    }
+
+    function addToTimeline(endpoint, article = null, count = 0) {
+      const timeline = document.getElementById('timelineContent');
+      const timelineItems = timeline.children.length;
+      
+      let content = '';
+      if (endpoint === 'profile') {
+        content = `
+          <div class="timeline-title">POST /profile</div>
+          <div class="timeline-description">
+            Trained user profile: UUID <code>user-sarah-123</code> read "${article.title}"
+          </div>
+          <div class="code-block">
+            <span class="code-comment">// Train user profile</span>
+fetch(<span class="code-string">'/profile?apikey=site.com&uuid=user-sarah-123&url=${article.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}'</span>);
+          </div>
+        `;
+      } else if (endpoint === 'related') {
+        content = `
+          <div class="timeline-title">GET /related</div>
+          <div class="timeline-description">
+            Retrieved ${count} personalized recommendations for Sarah
+          </div>
+          <div class="code-block">
+            <span class="code-comment">// Get personalized recommendations</span>
+fetch(<span class="code-string">'/related?apikey=site.com&uuid=user-sarah-123&limit=5'</span>)
+  .then(<span class="code-keyword">res</span> => <span class="code-keyword">res</span>.json())
+  .then(<span class="code-keyword">data</span> => displayRecommendations(<span class="code-keyword">data</span>));
+          </div>
+        `;
+      }
+      
+      const item = document.createElement('div');
+      item.className = 'timeline-item';
+      item.style.animationDelay = `${timelineItems * 0.2}s`;
+      item.innerHTML = `
+        <div class="timeline-dot">${timelineItems + 1}</div>
+        <div class="timeline-content">${content}</div>
+      `;
+      
+      timeline.appendChild(item);
+    }
+
+    function updateStats() {
+      document.getElementById('stats').style.display = 'block';
+      document.getElementById('statArticles').textContent = readArticles.length;
+      document.getElementById('statInterests').textContent = Object.keys(interests).length;
+    }
+
+    function setStep(step) {
+      currentStep = step;
+      
+      for (let i = 1; i <= 3; i++) {
+        const stepEl = document.getElementById(`step${i}`);
+        stepEl.classList.remove('active', 'completed');
+        
+        if (i < step) {
+          stepEl.classList.add('completed');
+        } else if (i === step) {
+          stepEl.classList.add('active');
+        }
+      }
+    }
+
+    async function startDemo() {
+      if (demoRunning) return;
+      demoRunning = true;
+      
+      setStep(1);
+      
+      // Simulate reading articles from different categories
+      // 3 Technology, 2 Environment, 1 Lifestyle
+      const articlesToRead = [1, 2, 3, 7, 8, 13];
+      
+      for (let i = 0; i < articlesToRead.length; i++) {
+        await sleep(2000);
+        readArticle(articlesToRead[i]);
+      }
+      
+      demoRunning = false;
+    }
+
+    function resetDemo() {
+      readArticles = [];
+      interests = {};
+      currentStep = 0;
+      demoRunning = false;
+      
+      document.getElementById('userProfile').style.display = 'none';
+      document.getElementById('recommendations').style.display = 'none';
+      document.getElementById('apiTimeline').style.display = 'none';
+      document.getElementById('timelineContent').innerHTML = '';
+      
+      setStep(0);
+      renderArticles();
+      
+      document.getElementById('statArticles').textContent = '0';
+      document.getElementById('statInterests').textContent = '0';
+      document.getElementById('statRecommendations').textContent = '0';
+    }
+
+    async function skipToRecommendations() {
+      resetDemo();
+      demoRunning = true;
+      
+      // Read 3 Tech, 2 Environment, 1 Lifestyle
+      const articlesToRead = [1, 2, 3, 7, 8, 13];
+      
+      for (let i = 0; i < articlesToRead.length; i++) {
+        readArticle(articlesToRead[i]);
+        await sleep(500);
+      }
+      
+      demoRunning = false;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Initialize on load
+    initDemo();
+  </script>
+</body>
+</html>

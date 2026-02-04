@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parse.ly API Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --parsely-green: #00d084;
+      --parsely-dark: #0a2540;
+      --parsely-blue: #0066ff;
+      --bg-white: #ffffff;
+      --bg-light: #f7f9fc;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --border-color: #e5e7eb;
+      --border-hover: #d1d5db;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-light);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-white);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo {
+      height: 28px;
+      width: auto;
+    }
+
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .header-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 2rem;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-hover);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--parsely-green);
+      color: white;
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .label-with-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg-white);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    select:focus {
+      border-color: var(--parsely-green);
+      box-shadow: 0 0 0 3px rgba(0, 208, 132, 0.1);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--text-muted);
+    }
+
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 3rem;
+      appearance: none;
+    }
+
+    .info-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: help;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .info-icon:hover {
+      background: var(--parsely-green);
+      border-color: var(--parsely-green);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .tooltip {
+      position: fixed;
+      background: var(--bg-white);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 400px;
+      box-shadow: var(--shadow-xl);
+      z-index: 10000;
+      animation: tooltipFadeIn 0.2s ease-out;
+    }
+
+    @keyframes tooltipFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tooltip-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tooltip-icon {
+      font-size: 1.5rem;
+    }
+
+    .tooltip-title {
+      font-weight: 700;
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+
+    .tooltip-content {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .tooltip-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--parsely-green);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      padding: 0.5rem 1rem;
+      background: var(--bg-light);
+      border-radius: 6px;
+    }
+
+    .tooltip-link:hover {
+      background: var(--parsely-green);
+      color: white;
+    }
+
+    .tooltip-example {
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-top: 0.75rem;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.8125rem;
+      color: var(--parsely-blue);
+    }
+
+    .tooltip-example-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.875rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-primary {
+      background: var(--parsely-green);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: #00b872;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-white);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-light);
+      border-color: var(--border-hover);
+    }
+
+    .btn-clear {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-clear:hover {
+      background: var(--error);
+      border-color: var(--error);
+      color: white;
+    }
+
+    /* Results Section */
+    #resultsSection {
+      display: none;
+      margin-top: 3rem;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .results-count {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .results-count span {
+      color: var(--parsely-green);
+    }
+
+    .api-info {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .api-info-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+    }
+
+    .api-url {
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: var(--parsely-blue);
+      word-wrap: break-word;
+      padding: 1rem;
+      background: var(--bg-light);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .post-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .post-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--parsely-green);
+    }
+
+    .post-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: var(--bg-light);
+    }
+
+    .post-content {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .post-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .post-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .post-title a:hover {
+      color: var(--parsely-green);
+    }
+
+    .post-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.875rem;
+    }
+
+    .post-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .post-meta-icon {
+      font-size: 1rem;
+    }
+
+    .json-view {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .json-view-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .json-view-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .copy-btn {
+      padding: 0.5rem 1rem;
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .copy-btn:hover {
+      background: var(--parsely-green);
+      border-color: var(--parsely-green);
+      color: white;
+    }
+
+    .json-content {
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-height: 600px;
+      overflow: auto;
+    }
+
+    .json-content pre {
+      margin: 0;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem;
+      gap: 1.5rem;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--parsely-green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    /* Alert */
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      border: 1px solid;
+    }
+
+    .alert-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-title {
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      font-size: 0.9375rem;
+    }
+
+    .alert-text {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .alert.warning {
+      background: #fef3c7;
+      border-color: #fbbf24;
+      color: #92400e;
+    }
+
+    .alert.error {
+      background: #fee2e2;
+      border-color: #f87171;
+      color: #991b1b;
+    }
+
+    .alert.success {
+      background: #d1fae5;
+      border-color: var(--parsely-green);
+      color: #065f46;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--bg-white);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideInRight 0.3s ease-out;
+      z-index: 1000;
+      min-width: 300px;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.875rem;
+    }
+
+    .toast.success .toast-icon {
+      background: var(--parsely-green);
+      color: white;
+    }
+
+    .toast.error .toast-icon {
+      background: var(--error);
+      color: white;
+    }
+
+    .toast.warning .toast-icon {
+      background: var(--warning);
+      color: white;
+    }
+
+    .toast-message {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .results-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .header-content {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-light);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--parsely-green);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="logo-container">
+        <img src="https://www.parse.ly/wp-content/uploads/sites/6/2023/12/parsely-logo.svg" alt="Parse.ly" class="logo" />
+      </div>
+      <div class="header-subtitle">API Explorer</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1 class="page-title">API Explorer</h1>
+    <p class="page-subtitle">Test and explore the Parse.ly Analytics API with an intuitive interface</p>
+
+    <div id="formSection">
+      <div class="main-grid">
+        <!-- Authentication Card -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">🔐</span>
+            Authentication
+          </h2>
+          <div class="form-group">
+            <div class="label-with-info">
+              <label for="siteID">Site ID</label>
+              <span class="info-icon" onclick="showTooltip(event, 'siteID')">?</span>
+            </div>
+            <input type="text" id="siteID" placeholder="your-site.com">
+          </div>
+          <div class="form-group">
+            <div class="label-with-info">
+              <label for="secret">API Secret</label>
+              <span class="info-icon" onclick="showTooltip(event, 'secret')">?</span>
+            </div>
+            <input type="text" id="secret" placeholder="your-api-secret">
+          </div>
+        </div>
+
+        <!-- Endpoint Configuration -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">🎯</span>
+            Endpoint
+          </h2>
+          <div class="form-group">
+            <div class="label-with-info">
+              <label for="endpoint">API Endpoint</label>
+              <span class="info-icon" onclick="showTooltip(event, 'endpoint')">?</span>
+            </div>
+            <select id="endpoint">
+              <optgroup label="Analytics">
+                <option value="/analytics/posts" selected>/analytics/posts</option>
+                <option value="/analytics/campaigns">/analytics/campaigns</option>
+                <option value="/analytics/authors">/analytics/authors</option>
+                <option value="/analytics/channels">/analytics/channels</option>
+                <option value="/analytics/referrers">/analytics/referrers</option>
+                <option value="/analytics/sections">/analytics/sections</option>
+                <option value="/analytics/segments">/analytics/segments</option>
+                <option value="/analytics/tags">/analytics/tags</option>
+                <option value="/analytics/videos">/analytics/videos</option>
+                <option value="/analytics/post/detail">/analytics/post/detail</option>
+              </optgroup>
+              <optgroup label="Recommendations">
+                <option value="/related">/related - Content recommendations</option>
+                <option value="/profile">/profile - Train user profile (POST)</option>
+                <option value="/history">/history - View user history</option>
+              </optgroup>
+              <optgroup label="Shares">
+                <option value="/shares/posts">/shares/posts</option>
+                <option value="/shares/post/detail">/shares/post/detail</option>
+              </optgroup>
+              <optgroup label="Referrers">
+                <option value="/referrers/social">/referrers/social</option>
+                <option value="/referrers/search">/referrers/search</option>
+                <option value="/referrers/other">/referrers/other</option>
+                <option value="/referrers/internal">/referrers/internal</option>
+                <option value="/referrers/post/detail">/referrers/post/detail</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option value="/profile">/profile</option>
+                <option value="/search">/search</option>
+                <option value="/top/posts">/top/posts</option>
+                <option value="/top/videos">/top/videos</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <div class="label-with-info">
+                <label for="limit">Limit</label>
+                <span class="info-icon" onclick="showTooltip(event, 'limit')">?</span>
+              </div>
+              <input type="text" id="limit" value="10" placeholder="10">
+            </div>
+            <div class="form-group">
+              <div class="label-with-info">
+                <label for="page">Page</label>
+                <span class="info-icon" onclick="showTooltip(event, 'page')">?</span>
+              </div>
+              <input type="text" id="page" value="1" placeholder="1">
+            </div>
+          </div>
+        </div>
+
+        <!-- Query Parameters -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">⚙️</span>
+            Parameters
+          </h2>
+          <div class="form-group">
+            <div class="label-with-info">
+              <label for="sort">Sort By</label>
+              <span class="info-icon" onclick="showTooltip(event, 'sort')">?</span>
+            </div>
+            <select id="sort">
+              <option value="views">Views</option>
+              <option value="mobile_views">Mobile Views</option>
+              <option value="tablet_views">Tablet Views</option>
+              <option value="desktop_views">Desktop Views</option>
+              <option value="visitors">Visitors</option>
+              <option value="visitors_new">New Visitors</option>
+              <option value="visitors_returning">Returning Visitors</option>
+              <option value="engaged_minutes">Engaged Minutes</option>
+              <option value="avg_engaged">Avg Engaged</option>
+              <option value="social_interactions">Social Interactions</option>
+              <option value="social_referrals">Social Referrals</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="label-with-info">
+              <label for="score">Score Type</label>
+              <span class="info-icon" onclick="showTooltip(event, 'score')">?</span>
+            </div>
+            <select id="score">
+              <option value="_score">Score</option>
+              <option value="pub_date">Publish Date</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">🔍</span>
+            Filters
+          </h2>
+          <div class="form-group">
+            <div class="label-with-info">
+              <label for="url">URL</label>
+              <span class="info-icon" onclick="showTooltip(event, 'url')">?</span>
+            </div>
+            <input type="text" id="url" placeholder="https://example.com/article">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <div class="label-with-info">
+                <label for="section">Section</label>
+                <span class="info-icon" onclick="showTooltip(event, 'section')">?</span>
+              </div>
+              <input type="text" id="section" placeholder="technology">
+            </div>
+            <div class="form-group">
+              <div class="label-with-info">
+                <label for="author">Author</label>
+                <span class="info-icon" onclick="showTooltip(event, 'author')">?</span>
+              </div>
+              <input type="text" id="author" placeholder="john-doe">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <div class="label-with-info">
+                <label for="pubstart">Pub Start</label>
+                <span class="info-icon" onclick="showTooltip(event, 'pubstart')">?</span>
+              </div>
+              <input type="text" id="pubstart" placeholder="2024-01-01 or 7d">
+            </div>
+            <div class="form-group">
+              <div class="label-with-info">
+                <label for="pubend">Pub End</label>
+                <span class="info-icon" onclick="showTooltip(event, 'pubend')">?</span>
+              </div>
+              <input type="text" id="pubend" placeholder="2024-12-31">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="label-with-info">
+              <label for="uuid">User UUID (for personalization)</label>
+              <span class="info-icon" onclick="showTooltip(event, 'uuid')">?</span>
+            </div>
+            <input type="text" id="uuid" placeholder="user-unique-id">
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card" style="grid-column: 1 / -1;">
+          <div class="btn-group">
+            <button class="btn-primary" onclick="submitRequest()">
+              Execute Request
+            </button>
+            <button class="btn-secondary" onclick="savePreset()">
+              Save Preset
+            </button>
+            <button class="btn-clear" onclick="clearForm()">
+              Clear All
+            </button>
+          </div>
+        </div>
+
+        <!-- Personalization Info Card -->
+        <div id="personalizationInfo" class="card" style="grid-column: 1 / -1; display: none;">
+          <h2 class="card-title">
+            <span class="card-icon">💡</span>
+            Personalization Endpoints Guide
+          </h2>
+          <div style="color: var(--text-secondary); line-height: 1.8;">
+            <p style="margin-bottom: 1rem;"><strong style="color: var(--parsely-green);">/related</strong> - Get personalized content recommendations for a user based on their reading history.</p>
+            <p style="margin-bottom: 1rem;"><strong style="color: var(--parsely-green);">/profile</strong> - Train a user profile by logging that a specific UUID has visited a URL. Note: This endpoint does NOT require an API secret.</p>
+            <p style="margin-bottom: 1rem;"><strong style="color: var(--parsely-green);">/history</strong> - View the reading history associated with a specific UUID.</p>
+            <p style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-light); border-radius: 8px; border-left: 3px solid var(--parsely-green);">
+              <strong>💡 How it works:</strong> First, use <code style="background: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: monospace;">/profile</code> to train user interests by passing URL + UUID. Then use <code style="background: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: monospace;">/related</code> with the UUID to get personalized recommendations. Profile data is kept for 7 days by default.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection"></div>
+  </div>
+
+  <script>
+    let activeTooltip = null;
+    let currentApiUrl = '';
+    let currentResponseData = null;
+
+    const tooltipData = {
+      siteID: {
+        icon: '🏢',
+        title: 'Site ID',
+        content: 'Your Parse.ly Site ID is typically your domain name (e.g., example.com).',
+        example: 'example.com',
+        docUrl: 'https://docs.parse.ly/api/overview/#authentication'
+      },
+      secret: {
+        icon: '🔑',
+        title: 'API Secret',
+        content: 'Your Parse.ly API Secret for authentication.',
+        example: 'your-secret-api-key',
+        docUrl: 'https://docs.parse.ly/api/overview/#authentication'
+      },
+      endpoint: {
+        icon: '🎯',
+        title: 'API Endpoint',
+        content: 'Choose the Parse.ly API endpoint for the data you want.',
+        example: '/analytics/posts',
+        docUrl: 'https://docs.parse.ly/api/reference/'
+      },
+      limit: {
+        icon: '📊',
+        title: 'Result Limit',
+        content: 'Maximum number of results per page (1-100).',
+        example: '10, 25, 50',
+        docUrl: 'https://docs.parse.ly/api/reference/#pagination'
+      },
+      page: {
+        icon: '📄',
+        title: 'Page Number',
+        content: 'Page number for paginated results.',
+        example: '1, 2, 3',
+        docUrl: 'https://docs.parse.ly/api/reference/#pagination'
+      },
+      sort: {
+        icon: '⬇️',
+        title: 'Sort Metric',
+        content: 'Metric to sort results by.',
+        example: 'views, visitors',
+        docUrl: 'https://docs.parse.ly/api/reference/#sorting'
+      },
+      score: {
+        icon: '⭐',
+        title: 'Score Type',
+        content: 'Scoring algorithm: _score or pub_date.',
+        example: '_score',
+        docUrl: 'https://docs.parse.ly/api/reference/#scoring'
+      },
+      url: {
+        icon: '🔗',
+        title: 'Filter by URL',
+        content: 'Filter to specific post URL.',
+        example: 'https://example.com/article',
+        docUrl: 'https://docs.parse.ly/api/reference/#filters'
+      },
+      section: {
+        icon: '📁',
+        title: 'Section Filter',
+        content: 'Filter by content section.',
+        example: 'technology, sports',
+        docUrl: 'https://docs.parse.ly/api/reference/#filters'
+      },
+      author: {
+        icon: '✍️',
+        title: 'Author Filter',
+        content: 'Filter by author name.',
+        example: 'john-doe',
+        docUrl: 'https://docs.parse.ly/api/reference/#filters'
+      },
+      uuid: {
+        icon: '👤',
+        title: 'User UUID',
+        content: 'Unique user identifier for personalized recommendations. Used with /profile (to train), /history (to view), and /related (to get personalized recommendations). Note: /profile endpoint does not require API secret.',
+        example: 'user-12345 or anonymous-uuid',
+        docUrl: 'https://docs.parse.ly/content-recommendations/'
+      },
+      pubstart: {
+        icon: '📅',
+        title: 'Publication Start',
+        content: 'Start date (YYYY-MM-DD or 7d, 30d).',
+        example: '2024-01-01, 7d',
+        docUrl: 'https://docs.parse.ly/api/reference/#date-filters'
+      },
+      pubend: {
+        icon: '📅',
+        title: 'Publication End',
+        content: 'End date for filtering.',
+        example: '2024-12-31',
+        docUrl: 'https://docs.parse.ly/api/reference/#date-filters'
+      }
+    };
+
+    function showTooltip(event, fieldId) {
+      event.stopPropagation();
+      
+      if (activeTooltip) {
+        activeTooltip.remove();
+        activeTooltip = null;
+      }
+
+      const data = tooltipData[fieldId];
+      if (!data) return;
+
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+      tooltip.innerHTML = `
+        <div class="tooltip-header">
+          <span class="tooltip-icon">${data.icon}</span>
+          <span class="tooltip-title">${data.title}</span>
+        </div>
+        <div class="tooltip-content">${data.content}</div>
+        ${data.example ? `
+          <div class="tooltip-example">
+            <div class="tooltip-example-label">Example:</div>
+            ${data.example}
+          </div>
+        ` : ''}
+        <a href="${data.docUrl}" target="_blank" class="tooltip-link">
+          View Documentation →
+        </a>
+      `;
+
+      document.body.appendChild(tooltip);
+      activeTooltip = tooltip;
+
+      const rect = event.target.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      
+      let top = rect.bottom + 10;
+      let left = rect.left - (tooltipRect.width / 2) + (rect.width / 2);
+
+      if (left + tooltipRect.width > window.innerWidth - 20) {
+        left = window.innerWidth - tooltipRect.width - 20;
+      }
+      if (left < 20) {
+        left = 20;
+      }
+      if (top + tooltipRect.height > window.innerHeight - 20) {
+        top = rect.top - tooltipRect.height - 10;
+      }
+
+      tooltip.style.top = `${top}px`;
+      tooltip.style.left = `${left}px`;
+    }
+
+    document.addEventListener('click', (event) => {
+      if (activeTooltip && !event.target.classList.contains('info-icon')) {
+        activeTooltip.remove();
+        activeTooltip = null;
+      }
+    });
+
+    window.addEventListener('scroll', () => {
+      if (activeTooltip) {
+        activeTooltip.remove();
+        activeTooltip = null;
+      }
+    });
+
+    function buildApiUrl() {
+      const siteID = document.getElementById('siteID').value;
+      const secret = document.getElementById('secret').value;
+      const endpoint = document.getElementById('endpoint').value;
+      const sort = document.getElementById('sort').value;
+      const score = document.getElementById('score').value;
+      const limit = document.getElementById('limit').value;
+      const page = document.getElementById('page').value;
+
+      // For /profile endpoint, secret is not required
+      const isProfileEndpoint = endpoint === '/profile';
+      let url = `https://api.parsely.com/v2${endpoint}?apikey=${siteID}`;
+      
+      if (!isProfileEndpoint && secret) {
+        url += `&secret=${secret}`;
+      }
+      
+      url += `&sort=${sort}&score=${score}&limit=${limit}&page=${page}`;
+
+      const optionalFields = ['url', 'section', 'author', 'uuid'];
+      optionalFields.forEach(field => {
+        const value = document.getElementById(field).value;
+        if (value) {
+          url += `&${field}=${encodeURIComponent(value)}`;
+        }
+      });
+
+      if (document.getElementById('pubstart').value) {
+        url += `&pub_date_start=${document.getElementById('pubstart').value}`;
+      }
+      if (document.getElementById('pubend').value) {
+        url += `&pub_date_end=${document.getElementById('pubend').value}`;
+      }
+
+      return url;
+    }
+
+    async function submitRequest() {
+      const siteID = document.getElementById('siteID').value;
+      const secret = document.getElementById('secret').value;
+      const endpoint = document.getElementById('endpoint').value;
+
+      if (!siteID) {
+        showToast('Please enter Site ID', 'error');
+        return;
+      }
+
+      // /profile endpoint doesn't require secret
+      if (endpoint !== '/profile' && !secret) {
+        showToast('Please enter API Secret', 'error');
+        return;
+      }
+
+      // Show info for personalization endpoints
+      if (endpoint === '/profile' || endpoint === '/history' || endpoint === '/related') {
+        const uuid = document.getElementById('uuid').value;
+        if (!uuid) {
+          showToast('UUID is required for personalization endpoints', 'warning');
+          return;
+        }
+      }
+
+      currentApiUrl = buildApiUrl();
+      
+      const resultsSection = document.getElementById('resultsSection');
+      resultsSection.style.display = 'block';
+      resultsSection.innerHTML = `
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Fetching data from Parse.ly API...</div>
+        </div>
+      `;
+
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      try {
+        const response = await fetch(currentApiUrl);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        currentResponseData = data;
+        displayResults(data);
+        showToast('Request completed successfully!', 'success');
+      } catch (error) {
+        displayError(error);
+        showToast('Request failed', 'error');
+      }
+    }
+
+    function displayResults(data) {
+      const resultsSection = document.getElementById('resultsSection');
+      const posts = data.data || [];
+      
+      let html = `
+        <div class="api-info">
+          <div class="api-info-title">API Query URL</div>
+          <div class="api-url">${currentApiUrl}</div>
+        </div>
+
+        <div class="results-header">
+          <div class="results-count"><span>${posts.length}</span> Results Found</div>
+          <button class="btn-secondary" onclick="scrollToForm()">← Back to Form</button>
+        </div>
+
+        <div class="results-grid">
+      `;
+
+      posts.forEach(post => {
+        const title = post.title || 'Untitled';
+        const url = post.url || '#';
+        const image = post.image_url || 'https://via.placeholder.com/400x300/f7f9fc/00d084?text=No+Image';
+        const views = post.views ? post.views.toLocaleString() : 'N/A';
+        const visitors = post.visitors ? post.visitors.toLocaleString() : 'N/A';
+
+        html += `
+          <div class="post-card">
+            <img src="${image}" alt="${title}" class="post-image" onerror="this.src='https://via.placeholder.com/400x300/f7f9fc/00d084?text=No+Image'">
+            <div class="post-content">
+              <div class="post-title">
+                <a href="${url}" target="_blank">${title}</a>
+              </div>
+              <div class="post-meta">
+                <span class="post-meta-item"><span class="post-meta-icon">👁️</span> ${views}</span>
+                <span class="post-meta-item"><span class="post-meta-icon">👥</span> ${visitors}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+        </div>
+
+        <div class="json-view">
+          <div class="json-view-header">
+            <div class="json-view-title">Raw JSON Response</div>
+            <button class="copy-btn" onclick="copyJSON()">📋 Copy JSON</button>
+          </div>
+          <div class="json-content">
+            <pre id="jsonData">${JSON.stringify(data, null, 2)}</pre>
+          </div>
+        </div>
+      `;
+
+      resultsSection.innerHTML = html;
+    }
+
+    function displayError(error) {
+      const resultsSection = document.getElementById('resultsSection');
+      resultsSection.innerHTML = `
+        <div class="alert error">
+          <span class="alert-icon">⚠️</span>
+          <div class="alert-content">
+            <div class="alert-title">Request Failed</div>
+            <div class="alert-text">${error.message}. This may be due to CORS restrictions. Try the URL below with curl or Postman.</div>
+          </div>
+        </div>
+
+        <div class="api-info">
+          <div class="api-info-title">Request URL</div>
+          <div class="api-url">${currentApiUrl}</div>
+        </div>
+
+        <div class="results-header">
+          <button class="btn-secondary" onclick="scrollToForm()">← Back to Form</button>
+        </div>
+      `;
+    }
+
+    function scrollToForm() {
+      document.getElementById('formSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function copyJSON() {
+      const jsonData = document.getElementById('jsonData').textContent;
+      navigator.clipboard.writeText(jsonData).then(() => {
+        showToast('JSON copied to clipboard!', 'success');
+      }).catch(() => {
+        showToast('Failed to copy', 'error');
+      });
+    }
+
+    function clearForm() {
+      if (confirm('Are you sure you want to clear all fields?')) {
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+          if (input.id !== 'limit' && input.id !== 'page') {
+            input.value = '';
+          }
+        });
+        showToast('Form cleared', 'success');
+      }
+    }
+
+    function savePreset() {
+      const preset = {
+        siteID: document.getElementById('siteID').value,
+        endpoint: document.getElementById('endpoint').value,
+        sort: document.getElementById('sort').value,
+        limit: document.getElementById('limit').value
+      };
+      localStorage.setItem('parsely_preset', JSON.stringify(preset));
+      showToast('Preset saved!', 'success');
+    }
+
+    function loadPreset() {
+      const preset = localStorage.getItem('parsely_preset');
+      if (preset) {
+        const data = JSON.parse(preset);
+        Object.keys(data).forEach(key => {
+          const element = document.getElementById(key);
+          if (element) element.value = data[key];
+        });
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icons = { success: '✓', error: '✗', warning: '⚠' };
+      toast.innerHTML = `
+        <div class="toast-icon">${icons[type]}</div>
+        <div class="toast-message">${message}</div>
+      `;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    window.addEventListener('load', loadPreset);
+
+    // Show/hide personalization info based on endpoint selection
+    document.addEventListener('DOMContentLoaded', function() {
+      const endpointSelect = document.getElementById('endpoint');
+      const personalizationInfo = document.getElementById('personalizationInfo');
+      
+      if (endpointSelect && personalizationInfo) {
+        endpointSelect.addEventListener('change', function() {
+          const endpoint = this.value;
+          const isPersonalization = endpoint === '/related' || endpoint === '/profile' || endpoint === '/history';
+          personalizationInfo.style.display = isPersonalization ? 'block' : 'none';
+        });
+      }
+    });
+  </script>
+</body>
+</html>

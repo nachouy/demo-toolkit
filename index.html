@@ -3,16 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DPL Explorer - Parse.ly Analytics Intelligence</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://unpkg.com/d3@7.8.5/dist/d3.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Parse.ly Demo Hub - Analytics Intelligence Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Parse.ly Brand Colors */
             --parsely-green: #5eba00;
             --parsely-green-dark: #4a9500;
             --parsely-green-light: #e8f5d9;
@@ -23,16 +17,9 @@
             --parsely-gray-100: #e9ecef;
             --parsely-gray-200: #dee2e6;
             --parsely-gray-300: #ced4da;
-            --parsely-gray-400: #adb5bd;
             --parsely-gray-600: #6c757d;
             --parsely-gray-700: #495057;
-            --parsely-gray-800: #343a40;
             --parsely-gray-900: #212529;
-            
-            --accent-orange: #ff6b35;
-            --accent-purple: #6a4c93;
-            --accent-teal: #17a2b8;
-            --accent-red: #dc3545;
         }
 
         * {
@@ -43,51 +30,47 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--parsely-gray-50);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             color: var(--parsely-gray-900);
             line-height: 1.6;
-        }
-
-        .app-layout {
-            display: flex;
             min-height: 100vh;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
+        /* Header */
+        .header {
             background: white;
-            border-right: 1px solid var(--parsely-gray-200);
+            border-bottom: 2px solid var(--parsely-gray-200);
             padding: 1.5rem 0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
-        .logo-container {
-            padding: 0 1.5rem 1.5rem;
-            border-bottom: 1px solid var(--parsely-gray-200);
-            margin-bottom: 1.5rem;
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .logo {
+        .logo-section {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             background: var(--parsely-green);
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: 800;
-            font-size: 1.25rem;
+            font-weight: 900;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(94, 186, 0, 0.3);
         }
 
         .logo-text {
@@ -96,117 +79,16 @@
         }
 
         .logo-title {
-            font-size: 1.125rem;
-            font-weight: 700;
+            font-size: 1.5rem;
+            font-weight: 800;
             color: var(--parsely-gray-900);
-            line-height: 1.2;
+            letter-spacing: -0.5px;
         }
 
         .logo-subtitle {
-            font-size: 0.75rem;
-            color: var(--parsely-gray-600);
-            font-weight: 500;
-        }
-
-        .sidebar-section {
-            padding: 0 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .sidebar-section-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--parsely-gray-600);
-            margin-bottom: 0.75rem;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            margin: 0.25rem 0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--parsely-gray-700);
-        }
-
-        .nav-item:hover {
-            background: var(--parsely-gray-50);
-            color: var(--parsely-gray-900);
-        }
-
-        .nav-item.active {
-            background: var(--parsely-green-light);
-            color: var(--parsely-green-dark);
-            font-weight: 600;
-        }
-
-        .nav-icon {
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .schema-tree {
             font-size: 0.813rem;
-            padding-left: 0.5rem;
-        }
-
-        .schema-category {
-            margin-bottom: 0.75rem;
-        }
-
-        .schema-category-title {
-            font-weight: 600;
-            color: var(--parsely-gray-800);
-            margin-bottom: 0.25rem;
-            padding: 0.5rem;
-            background: var(--parsely-gray-50);
-            border-radius: 4px;
-        }
-
-        .schema-field {
-            padding: 0.25rem 0.5rem;
             color: var(--parsely-gray-600);
-            font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-left: 280px;
-            flex: 1;
-            padding: 2rem;
-            min-height: 100vh;
-        }
-
-        .header {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .page-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--parsely-gray-900);
+            font-weight: 500;
         }
 
         .status-badge {
@@ -215,10 +97,10 @@
             gap: 0.5rem;
             padding: 0.5rem 1rem;
             background: var(--parsely-green-light);
-            border: 1px solid var(--parsely-green);
+            border: 2px solid var(--parsely-green);
             border-radius: 20px;
             font-size: 0.875rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--parsely-green-dark);
         }
 
@@ -235,1952 +117,376 @@
             50% { opacity: 0.5; transform: scale(1.2); }
         }
 
-        /* Buttons */
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--parsely-green);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--parsely-green-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(94, 186, 0, 0.3);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: var(--parsely-gray-700);
-            border: 1px solid var(--parsely-gray-300);
-        }
-
-        .btn-secondary:hover {
-            background: var(--parsely-gray-50);
-            border-color: var(--parsely-gray-400);
-        }
-
-        /* Content Sections */
-        .content-section {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--parsely-gray-100);
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--parsely-gray-900);
-        }
-
-        /* Loading */
-        .loading-container {
+        /* Hero Section */
+        .hero {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
             text-align: center;
-            padding: 4rem 2rem;
         }
 
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid var(--parsely-green-light);
-            border-top-color: var(--parsely-green);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1.5rem;
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--parsely-gray-900);
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+            line-height: 1.1;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--parsely-green), var(--parsely-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .loading-text {
-            font-size: 1rem;
-            color: var(--parsely-gray-700);
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--parsely-gray-600);
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
             font-weight: 500;
         }
 
-        /* Metrics Grid */
-        .metrics-grid {
+        /* Demo Cards */
+        .demos-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .metric-card {
-            background: var(--parsely-gray-50);
-            border: 1px solid var(--parsely-gray-200);
-            border-radius: 10px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-color: var(--parsely-green);
-        }
-
-        .metric-label {
-            font-size: 0.813rem;
-            text-transform: uppercase;
-            color: var(--parsely-gray-600);
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .metric-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--parsely-gray-900);
-            margin-bottom: 0.5rem;
-        }
-
-        .metric-change {
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .metric-change.positive {
-            color: var(--parsely-green);
-        }
-
-        .metric-change.negative {
-            color: var(--accent-red);
-        }
-
-        /* Data Table */
-        .data-table-container {
-            overflow-x: auto;
-            margin-top: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid var(--parsely-gray-200);
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--parsely-gray-200);
-            font-size: 0.875rem;
-        }
-
-        .data-table th {
-            background: var(--parsely-gray-50);
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            color: var(--parsely-gray-700);
-            letter-spacing: 0.5px;
-        }
-
-        .data-table tbody tr {
-            transition: background 0.2s ease;
-        }
-
-        .data-table tbody tr:hover {
-            background: var(--parsely-green-light);
-        }
-
-        /* Chart */
-        .chart-container {
-            position: relative;
-            height: 350px;
-            margin-top: 1.5rem;
-        }
-
-        /* Segments */
-        .segments-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
             gap: 2rem;
-            margin-top: 1.5rem;
         }
 
-        .segment-panel {
-            background: var(--parsely-gray-50);
-            border: 1px solid var(--parsely-gray-200);
-            border-radius: 10px;
-            padding: 1.5rem;
-        }
-
-        .segment-panel-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--parsely-gray-900);
-            margin-bottom: 1rem;
-        }
-
-        .segment-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .segment-chip {
-            padding: 0.5rem 1rem;
+        .demo-card {
             background: white;
-            border: 2px solid var(--parsely-gray-300);
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border: 2px solid var(--parsely-gray-200);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .segment-chip:hover {
-            border-color: var(--parsely-green);
-            transform: scale(1.05);
-        }
-
-        .segment-chip.selected {
-            background: var(--parsely-green);
-            color: white;
-            border-color: var(--parsely-green);
-        }
-
-        .segment-count {
-            background: rgba(0, 0, 0, 0.1);
-            padding: 0.125rem 0.5rem;
-            border-radius: 10px;
-            font-size: 0.75rem;
-        }
-
-        .segment-chip.selected .segment-count {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .cross-segment-info {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background: var(--parsely-blue-light);
-            border: 1px solid var(--parsely-blue);
-            border-radius: 8px;
-        }
-
-        .cross-segment-title {
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--parsely-blue);
-            margin-bottom: 0.5rem;
-        }
-
-        .cross-segment-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 0.75rem;
-        }
-
-        .cross-segment-stat {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        .cross-segment-stat-value {
-            font-weight: 700;
-            color: var(--parsely-blue);
-        }
-
-        /* Scorecard */
-        .scorecard-explanation {
-            background: var(--parsely-blue-light);
-            border: 1px solid var(--parsely-blue);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .scorecard-explanation h3 {
-            color: var(--parsely-blue);
-            margin-bottom: 1rem;
-        }
-
-        .score-scale {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.75rem;
-            margin: 1rem 0;
-        }
-
-        .score-item {
-            text-align: center;
-            padding: 1rem;
-            border-radius: 8px;
-        }
-
-        .score-item.score-1 { background: rgba(220, 53, 69, 0.1); }
-        .score-item.score-2 { background: rgba(255, 107, 53, 0.1); }
-        .score-item.score-3 { background: rgba(255, 193, 7, 0.1); }
-        .score-item.score-4 { background: rgba(94, 186, 0, 0.1); }
-        .score-item.score-5 { background: rgba(40, 167, 69, 0.1); }
-
-        .score-number {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .score-1 .score-number { color: #dc3545; }
-        .score-2 .score-number { color: #ff6b35; }
-        .score-3 .score-number { color: #ffc107; }
-        .score-4 .score-number { color: #5eba00; }
-        .score-5 .score-number { color: #28a745; }
-
-        .score-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-top: 0.25rem;
-        }
-
-        .score-percentage {
-            font-size: 0.7rem;
-            color: var(--parsely-gray-600);
-            margin-top: 0.25rem;
-        }
-
-        .scorecard-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1.5rem;
-        }
-
-        .scorecard-table th,
-        .scorecard-table td {
-            padding: 1rem;
-            text-align: center;
-            border: 1px solid var(--parsely-gray-200);
-            font-size: 0.875rem;
-        }
-
-        .scorecard-table th {
-            background: var(--parsely-gray-50);
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            color: var(--parsely-gray-700);
-        }
-
-        .scorecard-table td:first-child {
-            text-align: left;
-            font-weight: 600;
-        }
-
-        .score-cell {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-weight: 700;
-            min-width: 40px;
-        }
-
-        .score-cell.score-1 {
-            background: rgba(220, 53, 69, 0.2);
-            color: #dc3545;
-            border: 1px solid rgba(220, 53, 69, 0.3);
-        }
-
-        .score-cell.score-2 {
-            background: rgba(255, 107, 53, 0.2);
-            color: #ff6b35;
-            border: 1px solid rgba(255, 107, 53, 0.3);
-        }
-
-        .score-cell.score-3 {
-            background: rgba(255, 193, 7, 0.2);
-            color: #d39e00;
-            border: 1px solid rgba(255, 193, 7, 0.3);
-        }
-
-        .score-cell.score-4 {
-            background: rgba(94, 186, 0, 0.2);
-            color: #5eba00;
-            border: 1px solid rgba(94, 186, 0, 0.3);
-        }
-
-        .score-cell.score-5 {
-            background: rgba(40, 167, 69, 0.2);
-            color: #28a745;
-            border: 1px solid rgba(40, 167, 69, 0.3);
-        }
-
-        /* Sankey */
-        .sankey-container {
-            width: 100%;
-            height: 500px;
-            margin-top: 1.5rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .sidebar {
-                width: 240px;
-            }
-            .main-content {
-                margin-left: 240px;
-            }
-            .segments-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .main-content {
-                margin-left: 0;
-            }
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
+        .demo-card::before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
+            height: 6px;
+            background: linear-gradient(90deg, var(--card-color), var(--card-color-light));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            border-color: var(--card-color);
+        }
+
+        .demo-card:hover::before {
+            opacity: 1;
+        }
+
+        .demo-card.dpl {
+            --card-color: #5eba00;
+            --card-color-light: #7dd321;
+        }
+
+        .demo-card.api {
+            --card-color: #0066cc;
+            --card-color-light: #3399ff;
+        }
+
+        .demo-card.personalization {
+            --card-color: #ff6b35;
+            --card-color-light: #ff8c5a;
+        }
+
+        .demo-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.2s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-size: 2rem;
             margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--parsely-gray-100);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
+        .demo-card.dpl .demo-icon {
+            background: linear-gradient(135deg, #5eba00, #7dd321);
+        }
+
+        .demo-card.api .demo-icon {
+            background: linear-gradient(135deg, #0066cc, #3399ff);
+        }
+
+        .demo-card.personalization .demo-icon {
+            background: linear-gradient(135deg, #ff6b35, #ff8c5a);
+        }
+
+        .demo-title {
+            font-size: 1.75rem;
+            font-weight: 800;
             color: var(--parsely-gray-900);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.5px;
         }
 
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
+        .demo-description {
+            font-size: 1rem;
             color: var(--parsely-gray-600);
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .demo-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .demo-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.938rem;
+            color: var(--parsely-gray-700);
+        }
+
+        .demo-features li::before {
+            content: '✓';
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--parsely-green-light);
+            color: var(--parsely-green-dark);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-        }
-
-        .modal-close:hover {
-            background: var(--parsely-gray-100);
-            color: var(--parsely-gray-900);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--parsely-gray-900);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--parsely-gray-300);
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s ease;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--parsely-green);
-            box-shadow: 0 0 0 3px var(--parsely-green-light);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 2rem;
-        }
-
-        .custom-metric-card {
-            background: linear-gradient(135deg, var(--parsely-green-light) 0%, var(--parsely-blue-light) 100%);
-            border: 2px solid var(--parsely-green);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .custom-metric-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .custom-metric-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: var(--parsely-gray-900);
-        }
-
-        .custom-metric-badge {
-            background: var(--parsely-green);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
+            font-weight: 800;
             font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
+            flex-shrink: 0;
         }
 
-        .custom-metric-description {
-            color: var(--parsely-gray-700);
-            font-size: 0.875rem;
+        .demo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--card-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            filter: brightness(1.1);
+        }
+
+        .demo-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-top: 2px solid var(--parsely-gray-200);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-text {
+            color: var(--parsely-gray-600);
+            font-size: 0.938rem;
             margin-bottom: 1rem;
         }
 
-        .btn-delete {
-            background: var(--accent-red);
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.813rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
         }
 
-        .btn-delete:hover {
-            background: #c82333;
-            transform: translateY(-1px);
+        .footer-link {
+            color: var(--parsely-green);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--parsely-green-dark);
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .demos-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .demo-card {
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .demo-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .demo-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .demo-card:nth-child(3) {
+            animation-delay: 0.3s;
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-
-        // Generate sample data based on Parse.ly schema
-        const generateSampleData = () => {
-            const countries = ['US', 'CA', 'UK', 'FR', 'DE', 'JP', 'AU', 'BR', 'IN', 'MX'];
-            const cities = ['New York', 'San Francisco', 'London', 'Paris', 'Berlin', 'Tokyo', 'Sydney', 'São Paulo', 'Mumbai', 'Mexico City'];
-            const sections = ['Uncategorized', 'Analytics That Matter', 'Parse.ly Culture', 'Reports'];
-            const browsers = ['Chrome', 'Safari', 'Firefox', 'Edge'];
-            const devices = ['desktop', 'mobile', 'tablet'];
-            const actions = ['pageview', 'heartbeat', 'vheartbeat'];
-            const segments = ['Subscribers', 'CEOs', 'CTOs', 'Loyal Readers'];
-            
-            const sampleData = [];
-            
-            for (let i = 0; i < 500; i++) {
-                const isConversion = Math.random() > 0.85;
-                const conversionValue = isConversion ? (29.99 + Math.random() * 200) : 0;
-                const country = countries[Math.floor(Math.random() * countries.length)];
-                const section = sections[Math.floor(Math.random() * sections.length)];
-                const action = actions[Math.floor(Math.random() * actions.length)];
-                
-                sampleData.push({
-                    action: action,
-                    apikey: 'demoaccount.parsely.com',
-                    engaged_time_inc: Math.floor(Math.random() * 300),
-                    event_id: `0x${Math.random().toString(16).substr(2, 16)}`,
-                    ip_city: cities[Math.floor(Math.random() * cities.length)],
-                    ip_country: country,
-                    ip_continent: country === 'US' || country === 'CA' || country === 'MX' || country === 'BR' ? 'NA' : country === 'UK' || country === 'FR' || country === 'DE' ? 'EU' : 'AS',
-                    metadata_section: section,
-                    metadata_title: `Article ${i + 1}: ${section} insights and analysis`,
-                    metadata_authors: '[Staff]',
-                    ref_category: ['direct', 'search', 'social', 'internal'][Math.floor(Math.random() * 4)],
-                    ref_domain: ['google.com', 'facebook.com', 'twitter.com', ''][Math.floor(Math.random() * 4)],
-                    ts_action: new Date(Date.now() - Math.random() * 86400000).toISOString(),
-                    ua_browser: browsers[Math.floor(Math.random() * browsers.length)],
-                    ua_devicetype: devices[Math.floor(Math.random() * devices.length)],
-                    ua_os: ['Windows', 'macOS', 'iOS', 'Android'][Math.floor(Math.random() * 4)],
-                    url: `http://blog.parsely.com/post/${1000 + i}/`,
-                    url_path: `/post/${1000 + i}/`,
-                    url_domain: 'parsely.com',
-                    visitor_site_id: `visitor_${Math.floor(Math.random() * 100)}`,
-                    extra_data: JSON.stringify({
-                        woocommerce_order_id: isConversion ? `order_${10000 + i}` : null,
-                        woocommerce_payment_amount: conversionValue.toFixed(2),
-                        woocommerce_payment_currency: 'USD',
-                        woocommerce_payment_method: isConversion ? ['credit_card', 'paypal', 'stripe'][Math.floor(Math.random() * 3)] : null,
-                        article_interest: 1 + Math.floor(Math.random() * 5),
-                        article_engagement: 1 + Math.floor(Math.random() * 5),
-                        purposeful_reach: 1 + Math.floor(Math.random() * 5),
-                        conversion_rate: 1 + Math.floor(Math.random() * 5),
-                        audience_segment: segments[Math.floor(Math.random() * segments.length)]
-                    })
-                });
-            }
-            
-            return sampleData;
-        };
-
-        function App() {
-            const [loading, setLoading] = useState(false);
-            const [dataLoaded, setDataLoaded] = useState(false);
-            const [rawData, setRawData] = useState([]);
-            const [activeView, setActiveView] = useState('overview');
-
-            const handleLoadData = () => {
-                setLoading(true);
-                
-                // Simulate loading delay
-                setTimeout(() => {
-                    const data = generateSampleData();
-                    setRawData(data);
-                    setDataLoaded(true);
-                    setLoading(false);
-                }, 2000);
-            };
-
-            return (
-                <div className="app-layout">
-                    <Sidebar activeView={activeView} setActiveView={setActiveView} />
-                    <main className="main-content">
-                        {!dataLoaded ? (
-                            <div className="content-section">
-                                {loading ? (
-                                    <div className="loading-container">
-                                        <div className="loading-spinner"></div>
-                                        <p className="loading-text">Loading Parse.ly event stream...</p>
-                                        <p className="loading-text" style={{marginTop: '0.5rem', opacity: 0.7, fontSize: '0.875rem'}}>
-                                            Parsing CSV | Enriching with WooCommerce data | Building indexes
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div className="loading-container">
-                                        <h2 style={{marginBottom: '1rem', fontSize: '1.5rem'}}>Welcome to DPL Explorer</h2>
-                                        <p style={{marginBottom: '2rem', color: 'var(--parsely-gray-600)'}}>
-                                            Load Parse.ly raw event data to begin analytics
-                                        </p>
-                                        <button className="btn btn-primary" onClick={handleLoadData}>
-                                            <span>📁</span> Load Raw Data
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <>
-                                {activeView === 'overview' && <OverviewView data={rawData} />}
-                                {activeView === 'events' && <EventsView data={rawData} />}
-                                {activeView === 'metrics' && <MetricsView data={rawData} />}
-                                {activeView === 'segments' && <SegmentsView data={rawData} />}
-                                {activeView === 'journeys' && <JourneysView data={rawData} />}
-                                {activeView === 'scorecard' && <ScorecardView data={rawData} />}
-                            </>
-                        )}
-                    </main>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">P</div>
+                <div class="logo-text">
+                    <div class="logo-title">Parse.ly Demos</div>
+                    <div class="logo-subtitle">Analytics Intelligence Platform</div>
                 </div>
-            );
-        }
-
-        function Sidebar({ activeView, setActiveView }) {
-            const navItems = [
-                { id: 'overview', label: 'Overview', icon: '📊' },
-                { id: 'events', label: 'Raw Events', icon: '📋' },
-                { id: 'metrics', label: 'Custom Metrics', icon: '📈' },
-                { id: 'segments', label: 'Segments', icon: '👥' },
-                { id: 'journeys', label: 'User Journeys', icon: '🗺️' },
-                { id: 'scorecard', label: 'Scorecard', icon: '🎯' }
-            ];
-
-            const schemaCategories = [
-                {
-                    title: 'Event Data',
-                    fields: ['action', 'event_id', 'ts_action', 'engaged_time_inc']
-                },
-                {
-                    title: 'Visitor',
-                    fields: ['visitor_site_id', 'visitor_ip', 'visitor_network_id']
-                },
-                {
-                    title: 'Geographic',
-                    fields: ['ip_country', 'ip_city', 'ip_lat', 'ip_lon', 'ip_timezone']
-                },
-                {
-                    title: 'Device/Browser',
-                    fields: ['ua_device', 'ua_browser', 'ua_os', 'ua_devicetype']
-                },
-                {
-                    title: 'Metadata',
-                    fields: ['metadata_title', 'metadata_section', 'metadata_authors', 'metadata_tags']
-                },
-                {
-                    title: 'URL Info',
-                    fields: ['url', 'url_domain', 'url_path', 'referrer', 'ref_domain']
-                },
-                {
-                    title: 'Session',
-                    fields: ['session_id', 'session_timestamp', 'session_initial_url']
-                },
-                {
-                    title: 'Extra Data',
-                    fields: ['woocommerce_payment_*', 'article_metrics', 'audience_segment']
-                }
-            ];
-
-            return (
-                <aside className="sidebar">
-                    <div className="logo-container">
-                        <div className="logo">
-                            <div className="logo-icon">P</div>
-                            <div className="logo-text">
-                                <div className="logo-title">DPL Explorer</div>
-                                <div className="logo-subtitle">Parse.ly Analytics</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="sidebar-section">
-                        <div className="sidebar-section-title">Navigation</div>
-                        {navItems.map(item => (
-                            <div
-                                key={item.id}
-                                className={`nav-item ${activeView === item.id ? 'active' : ''}`}
-                                onClick={() => setActiveView(item.id)}
-                            >
-                                <span className="nav-icon">{item.icon}</span>
-                                <span>{item.label}</span>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="sidebar-section">
-                        <div className="sidebar-section-title">Data Schema</div>
-                        <div className="schema-tree">
-                            {schemaCategories.map((category, idx) => (
-                                <div key={idx} className="schema-category">
-                                    <div className="schema-category-title">{category.title}</div>
-                                    {category.fields.map((field, fidx) => (
-                                        <div key={fidx} className="schema-field">• {field}</div>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </aside>
-            );
-        }
-
-        function OverviewView({ data }) {
-            const totalEvents = data.length;
-            const uniqueVisitors = new Set(data.map(d => d.visitor_site_id)).size;
-            const avgEngagement = (data.reduce((sum, d) => sum + (parseInt(d.engaged_time_inc) || 0), 0) / data.length).toFixed(0);
-            
-            const totalRevenue = data.reduce((sum, d) => {
-                try {
-                    const extraData = JSON.parse(d.extra_data || '{}');
-                    return sum + parseFloat(extraData.woocommerce_payment_amount || 0);
-                } catch {
-                    return sum;
-                }
-            }, 0);
-
-            return (
-                <>
-                    <div className="header">
-                        <div className="header-top">
-                            <h1 className="page-title">Analytics Overview</h1>
-                            <div className="status-badge">
-                                <div className="pulse"></div>
-                                <span>Live Data</span>
-                            </div>
-                        </div>
-                        <p style={{color: 'var(--parsely-gray-600)'}}>
-                            Real-time analytics powered by Parse.ly Data Pipeline
-                        </p>
-                    </div>
-
-                    <div className="content-section">
-                        <div className="metrics-grid">
-                            <div className="metric-card">
-                                <div className="metric-label">Total Events</div>
-                                <div className="metric-value">{totalEvents.toLocaleString()}</div>
-                                <div className="metric-change positive">↑ 12.5% vs last period</div>
-                            </div>
-                            <div className="metric-card">
-                                <div className="metric-label">Unique Visitors</div>
-                                <div className="metric-value">{uniqueVisitors.toLocaleString()}</div>
-                                <div className="metric-change positive">↑ 8.3% vs last period</div>
-                            </div>
-                            <div className="metric-card">
-                                <div className="metric-label">Avg Engagement (sec)</div>
-                                <div className="metric-value">{avgEngagement}</div>
-                                <div className="metric-change negative">↓ 2.1% vs last period</div>
-                            </div>
-                            <div className="metric-card">
-                                <div className="metric-label">Total Revenue</div>
-                                <div className="metric-value">${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                                <div className="metric-change positive">↑ 18.7% vs last period</div>
-                            </div>
-                        </div>
-                        <EngagementChart data={data} />
-                    </div>
-                </>
-            );
-        }
-
-        function EngagementChart({ data }) {
-            const chartRef = useRef(null);
-            const chartInstance = useRef(null);
-
-            useEffect(() => {
-                if (!chartRef.current || !data.length) return;
-
-                const ctx = chartRef.current.getContext('2d');
-                
-                if (chartInstance.current) {
-                    chartInstance.current.destroy();
-                }
-
-                // Group by hour
-                const hours = Array.from({length: 24}, (_, i) => i);
-                const engagementByHour = hours.map(hour => {
-                    const hourData = data.filter(d => {
-                        if (!d.ts_action) return false;
-                        const date = new Date(d.ts_action);
-                        return date.getHours() === hour;
-                    });
-                    return hourData.reduce((sum, d) => sum + (parseInt(d.engaged_time_inc) || 0), 0) / (hourData.length || 1);
-                });
-
-                chartInstance.current = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: hours.map(h => `${h}:00`),
-                        datasets: [{
-                            label: 'Avg Engagement (seconds)',
-                            data: engagementByHour,
-                            borderColor: '#5eba00',
-                            backgroundColor: 'rgba(94, 186, 0, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointBackgroundColor: '#5eba00',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                labels: { 
-                                    color: '#212529',
-                                    font: { size: 12, weight: '600' }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: '#e9ecef' },
-                                ticks: { color: '#6c757d', font: { size: 11 } }
-                            },
-                            x: {
-                                grid: { color: '#e9ecef' },
-                                ticks: { color: '#6c757d', font: { size: 11 } }
-                            }
-                        }
-                    }
-                });
-
-                return () => {
-                    if (chartInstance.current) {
-                        chartInstance.current.destroy();
-                    }
-                };
-            }, [data]);
-
-            return (
-                <>
-                    <h3 style={{marginTop: '2rem', marginBottom: '1rem', fontSize: '1.125rem', fontWeight: 700}}>
-                        Engagement Trends by Hour
-                    </h3>
-                    <div className="chart-container">
-                        <canvas ref={chartRef}></canvas>
-                    </div>
-                </>
-            );
-        }
-
-        function EventsView({ data }) {
-            return (
-                <>
-                    <div className="header">
-                        <div className="header-top">
-                            <h1 className="page-title">Raw Event Stream</h1>
-                            <span style={{fontSize: '0.875rem', color: 'var(--parsely-gray-600)', fontWeight: 500}}>
-                                Parse.ly Schema v2.3.0
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="content-section">
-                        <div className="data-table-container">
-                            <table className="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Timestamp</th>
-                                        <th>Action</th>
-                                        <th>Visitor ID</th>
-                                        <th>URL</th>
-                                        <th>Country</th>
-                                        <th>Device</th>
-                                        <th>Engagement</th>
-                                        <th>Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data.slice(0, 50).map((event, idx) => {
-                                        let extraData = {};
-                                        try {
-                                            extraData = JSON.parse(event.extra_data || '{}');
-                                        } catch {}
-                                        
-                                        return (
-                                            <tr key={idx}>
-                                                <td style={{fontSize: '0.75rem', fontFamily: 'monospace'}}>
-                                                    {event.ts_action || 'N/A'}
-                                                </td>
-                                                <td>{event.action}</td>
-                                                <td style={{fontSize: '0.75rem', fontFamily: 'monospace'}}>
-                                                    {event.visitor_site_id?.substring(0, 12)}...
-                                                </td>
-                                                <td style={{maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-                                                    {event.metadata_title || event.url_path || 'N/A'}
-                                                </td>
-                                                <td>{event.ip_country || 'N/A'}</td>
-                                                <td>{event.ua_devicetype || 'N/A'}</td>
-                                                <td>{event.engaged_time_inc || 0}s</td>
-                                                <td style={{fontWeight: extraData.woocommerce_payment_amount > 0 ? 'bold' : 'normal', color: extraData.woocommerce_payment_amount > 0 ? '#5eba00' : 'inherit'}}>
-                                                    ${parseFloat(extraData.woocommerce_payment_amount || 0).toFixed(2)}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </>
-            );
-        }
-
-        function MetricsView({ data }) {
-            const [showModal, setShowModal] = useState(false);
-            const [customMetrics, setCustomMetrics] = useState([]);
-            const [newMetric, setNewMetric] = useState({
-                name: '',
-                description: '',
-                metric_type: 'sum',
-                field: 'engaged_time_inc'
-            });
-
-            const handleCreateMetric = () => {
-                if (!newMetric.name) return;
-                
-                setCustomMetrics([...customMetrics, { ...newMetric, id: Date.now() }]);
-                setNewMetric({
-                    name: '',
-                    description: '',
-                    metric_type: 'sum',
-                    field: 'engaged_time_inc'
-                });
-                setShowModal(false);
-            };
-
-            const handleDeleteMetric = (id) => {
-                setCustomMetrics(customMetrics.filter(m => m.id !== id));
-            };
-
-            return (
-                <>
-                    <div className="header">
-                        <div className="header-top">
-                            <h1 className="page-title">Custom Metrics</h1>
-                            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                                ✨ Custom Golden Metric
-                            </button>
-                        </div>
-                    </div>
-
-                    {customMetrics.map(metric => (
-                        <div key={metric.id} className="content-section">
-                            <div className="custom-metric-card">
-                                <div className="custom-metric-header">
-                                    <div>
-                                        <div className="custom-metric-title">{metric.name}</div>
-                                        <div className="custom-metric-description">{metric.description}</div>
-                                    </div>
-                                    <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
-                                        <span className="custom-metric-badge">Custom</span>
-                                        <button className="btn-delete" onClick={() => handleDeleteMetric(metric.id)}>
-                                            🗑️ Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <CustomMetricChart data={data} metric={metric} />
-                        </div>
-                    ))}
-
-                    <div className="content-section">
-                        <MetricVisualization 
-                            title="Article Interest"
-                            description="Subscriber click-through rate from homepage vs expected CTR"
-                            data={data}
-                            field="article_interest"
-                        />
-                    </div>
-
-                    <div className="content-section">
-                        <MetricVisualization 
-                            title="Article Engagement"
-                            description="Subscriber active time reading vs expected time"
-                            data={data}
-                            field="article_engagement"
-                        />
-                    </div>
-
-                    <div className="content-section">
-                        <MetricVisualization 
-                            title="Conversion Value"
-                            description="Revenue generated from WooCommerce conversions"
-                            data={data}
-                            field="revenue"
-                        />
-                    </div>
-
-                    {showModal && (
-                        <CustomMetricModal
-                            newMetric={newMetric}
-                            setNewMetric={setNewMetric}
-                            onClose={() => setShowModal(false)}
-                            onCreate={handleCreateMetric}
-                        />
-                    )}
-                </>
-            );
-        }
-
-        function CustomMetricModal({ newMetric, setNewMetric, onClose, onCreate }) {
-            return (
-                <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Create Golden Metric</h2>
-                            <button className="modal-close" onClick={onClose}>×</button>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Metric Name *</label>
-                            <input
-                                type="text"
-                                className="form-input"
-                                placeholder="e.g., Total Pageviews by Country"
-                                value={newMetric.name}
-                                onChange={(e) => setNewMetric({...newMetric, name: e.target.value})}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Description</label>
-                            <textarea
-                                className="form-textarea"
-                                placeholder="Describe what this metric measures..."
-                                value={newMetric.description}
-                                onChange={(e) => setNewMetric({...newMetric, description: e.target.value})}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Metric Type</label>
-                            <select
-                                className="form-select"
-                                value={newMetric.metric_type}
-                                onChange={(e) => setNewMetric({...newMetric, metric_type: e.target.value})}
-                            >
-                                <option value="sum">Sum</option>
-                                <option value="average">Average</option>
-                                <option value="count">Count</option>
-                                <option value="max">Maximum</option>
-                                <option value="min">Minimum</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Field to Analyze</label>
-                            <select
-                                className="form-select"
-                                value={newMetric.field}
-                                onChange={(e) => setNewMetric({...newMetric, field: e.target.value})}
-                            >
-                                <option value="engaged_time_inc">Engagement Time</option>
-                                <option value="revenue">Revenue (WooCommerce)</option>
-                                <option value="article_interest">Article Interest Score</option>
-                                <option value="article_engagement">Article Engagement Score</option>
-                                <option value="conversion_rate">Conversion Rate</option>
-                            </select>
-                        </div>
-
-                        <div className="modal-actions">
-                            <button className="btn btn-secondary" onClick={onClose}>
-                                Cancel
-                            </button>
-                            <button className="btn btn-primary" onClick={onCreate}>
-                                Create Metric
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        function CustomMetricChart({ data, metric }) {
-            const chartRef = useRef(null);
-            const chartInstance = useRef(null);
-
-            useEffect(() => {
-                if (!chartRef.current) return;
-
-                const ctx = chartRef.current.getContext('2d');
-                
-                if (chartInstance.current) {
-                    chartInstance.current.destroy();
-                }
-
-                // Calculate metric by country
-                const metricByCountry = {};
-                
-                data.forEach(row => {
-                    const country = row.ip_country || 'Unknown';
-                    
-                    if (!metricByCountry[country]) {
-                        metricByCountry[country] = { values: [], count: 0 };
-                    }
-
-                    let value = 0;
-                    if (metric.field === 'revenue') {
-                        try {
-                            const extraData = JSON.parse(row.extra_data || '{}');
-                            value = parseFloat(extraData.woocommerce_payment_amount || 0);
-                        } catch {}
-                    } else if (metric.field === 'engaged_time_inc') {
-                        value = parseInt(row.engaged_time_inc || 0);
-                    } else {
-                        try {
-                            const extraData = JSON.parse(row.extra_data || '{}');
-                            value = parseFloat(extraData[metric.field] || 0);
-                        } catch {}
-                    }
-
-                    metricByCountry[country].values.push(value);
-                    metricByCountry[country].count += 1;
-                });
-
-                // Calculate based on metric type
-                const labels = Object.keys(metricByCountry).slice(0, 10);
-                const chartData = labels.map(country => {
-                    const { values, count } = metricByCountry[country];
-                    
-                    switch (metric.metric_type) {
-                        case 'sum':
-                            return values.reduce((a, b) => a + b, 0);
-                        case 'average':
-                            return values.reduce((a, b) => a + b, 0) / count;
-                        case 'count':
-                            return count;
-                        case 'max':
-                            return Math.max(...values);
-                        case 'min':
-                            return Math.min(...values);
-                        default:
-                            return values.reduce((a, b) => a + b, 0);
-                    }
-                });
-
-                chartInstance.current = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: metric.name,
-                            data: chartData,
-                            backgroundColor: 'rgba(94, 186, 0, 0.7)',
-                            borderColor: '#5eba00',
-                            borderWidth: 2,
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: '#e9ecef' },
-                                ticks: { color: '#6c757d' }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#6c757d' }
-                            }
-                        }
-                    }
-                });
-
-                return () => {
-                    if (chartInstance.current) {
-                        chartInstance.current.destroy();
-                    }
-                };
-            }, [data, metric]);
-
-            return (
-                <div className="chart-container">
-                    <canvas ref={chartRef}></canvas>
-                </div>
-            );
-        }
-
-        function MetricVisualization({ title, description, data, field }) {
-            const chartRef = useRef(null);
-            const chartInstance = useRef(null);
-
-            useEffect(() => {
-                if (!chartRef.current) return;
-
-                const ctx = chartRef.current.getContext('2d');
-                
-                if (chartInstance.current) {
-                    chartInstance.current.destroy();
-                }
-
-                let chartData = [];
-                let labels = [];
-
-                if (field === 'revenue') {
-                    // Revenue by country
-                    const revenueByCountry = {};
-                    data.forEach(row => {
-                        try {
-                            const extraData = JSON.parse(row.extra_data || '{}');
-                            const revenue = parseFloat(extraData.woocommerce_payment_amount || 0);
-                            const country = row.ip_country || 'Unknown';
-                            revenueByCountry[country] = (revenueByCountry[country] || 0) + revenue;
-                        } catch {}
-                    });
-                    
-                    const sorted = Object.entries(revenueByCountry)
-                        .sort((a, b) => b[1] - a[1])
-                        .slice(0, 10);
-                    labels = sorted.map(([country]) => country);
-                    chartData = sorted.map(([, revenue]) => revenue);
-                } else {
-                    // Metric by section
-                    const metricBySection = {};
-                    data.forEach(row => {
-                        try {
-                            const extraData = JSON.parse(row.extra_data || '{}');
-                            const section = row.metadata_section || 'Uncategorized';
-                            if (!metricBySection[section]) {
-                                metricBySection[section] = { sum: 0, count: 0 };
-                            }
-                            metricBySection[section].sum += parseFloat(extraData[field] || 0);
-                            metricBySection[section].count += 1;
-                        } catch {}
-                    });
-                    
-                    labels = Object.keys(metricBySection);
-                    chartData = labels.map(section => 
-                        metricBySection[section].sum / metricBySection[section].count
-                    );
-                }
-
-                chartInstance.current = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: title,
-                            data: chartData,
-                            backgroundColor: 'rgba(94, 186, 0, 0.6)',
-                            borderColor: '#5eba00',
-                            borderWidth: 2,
-                            borderRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: '#e9ecef' },
-                                ticks: { color: '#6c757d' }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: { 
-                                    color: '#6c757d',
-                                    maxRotation: 45,
-                                    minRotation: 45
-                                }
-                            }
-                        }
-                    }
-                });
-
-                return () => {
-                    if (chartInstance.current) {
-                        chartInstance.current.destroy();
-                    }
-                };
-            }, [data, field, title]);
-
-            return (
-                <>
-                    <h3 style={{fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem'}}>{title}</h3>
-                    <p style={{color: 'var(--parsely-gray-600)', marginBottom: '1rem'}}>{description}</p>
-                    <div className="chart-container">
-                        <canvas ref={chartRef}></canvas>
-                    </div>
-                </>
-            );
-        }
-
-        function SegmentsView({ data }) {
-            const [selectedGeo, setSelectedGeo] = useState(null);
-            const [selectedAudience, setSelectedAudience] = useState(null);
-
-            // Calculate geo segments
-            const geoSegments = {};
-            data.forEach(row => {
-                const country = row.ip_country || 'Unknown';
-                geoSegments[country] = (geoSegments[country] || 0) + 1;
-            });
-            const topGeos = Object.entries(geoSegments)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-
-            // Calculate audience segments
-            const audienceSegments = {};
-            data.forEach(row => {
-                try {
-                    const extraData = JSON.parse(row.extra_data || '{}');
-                    const segment = extraData.audience_segment || 'Unknown';
-                    audienceSegments[segment] = (audienceSegments[segment] || 0) + 1;
-                } catch {}
-            });
-
-            // Cross-segment analysis
-            let crossSegmentData = {
-                count: 0,
-                revenue: 0,
-                avgEngagement: 0
-            };
-
-            if (selectedGeo || selectedAudience) {
-                const filtered = data.filter(row => {
-                    let matchGeo = !selectedGeo || row.ip_country === selectedGeo;
-                    let matchAudience = !selectedAudience;
-                    
-                    if (selectedAudience) {
-                        try {
-                            const extraData = JSON.parse(row.extra_data || '{}');
-                            matchAudience = extraData.audience_segment === selectedAudience;
-                        } catch {}
-                    }
-                    
-                    return matchGeo && matchAudience;
-                });
-
-                crossSegmentData.count = filtered.length;
-                crossSegmentData.revenue = filtered.reduce((sum, row) => {
-                    try {
-                        const extraData = JSON.parse(row.extra_data || '{}');
-                        return sum + parseFloat(extraData.woocommerce_payment_amount || 0);
-                    } catch {
-                        return sum;
-                    }
-                }, 0);
-                crossSegmentData.avgEngagement = filtered.reduce((sum, row) => 
-                    sum + (parseInt(row.engaged_time_inc) || 0), 0
-                ) / (filtered.length || 1);
-            }
-
-            return (
-                <>
-                    <div className="header">
-                        <div className="header-top">
-                            <h1 className="page-title">Audience & Geographic Segments</h1>
-                            <button className="btn btn-primary">+ Create Segment</button>
-                        </div>
-                        <p style={{color: 'var(--parsely-gray-600)', marginTop: '0.5rem'}}>
-                            Click segments to see cross-analysis
-                        </p>
-                    </div>
-
-                    <div className="content-section">
-                        <div className="segments-container">
-                            <div className="segment-panel">
-                                <div className="segment-panel-title">🌍 Geographic Segments</div>
-                                <div className="segment-chips">
-                                    {topGeos.map(([country, count]) => (
-                                        <div
-                                            key={country}
-                                            className={`segment-chip ${selectedGeo === country ? 'selected' : ''}`}
-                                            onClick={() => setSelectedGeo(selectedGeo === country ? null : country)}
-                                        >
-                                            <span>{country}</span>
-                                            <span className="segment-count">{count}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="segment-panel">
-                                <div className="segment-panel-title">👥 Audience Segments</div>
-                                <div className="segment-chips">
-                                    {Object.entries(audienceSegments).map(([segment, count]) => (
-                                        <div
-                                            key={segment}
-                                            className={`segment-chip ${selectedAudience === segment ? 'selected' : ''}`}
-                                            onClick={() => setSelectedAudience(selectedAudience === segment ? null : segment)}
-                                        >
-                                            <span>{segment}</span>
-                                            <span className="segment-count">{count}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {(selectedGeo || selectedAudience) && (
-                            <div className="cross-segment-info">
-                                <div className="cross-segment-title">
-                                    📊 Cross-Segment Analysis
-                                    {selectedGeo && selectedAudience && (
-                                        <span style={{fontWeight: 'normal', marginLeft: '0.5rem'}}>
-                                            ({selectedGeo} × {selectedAudience})
-                                        </span>
-                                    )}
-                                    {selectedGeo && !selectedAudience && (
-                                        <span style={{fontWeight: 'normal', marginLeft: '0.5rem'}}>
-                                            ({selectedGeo})
-                                        </span>
-                                    )}
-                                    {!selectedGeo && selectedAudience && (
-                                        <span style={{fontWeight: 'normal', marginLeft: '0.5rem'}}>
-                                            ({selectedAudience})
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="cross-segment-stats">
-                                    <div className="cross-segment-stat">
-                                        <span>Total Events:</span>
-                                        <span className="cross-segment-stat-value">
-                                            {crossSegmentData.count.toLocaleString()}
-                                        </span>
-                                    </div>
-                                    <div className="cross-segment-stat">
-                                        <span>Total Revenue:</span>
-                                        <span className="cross-segment-stat-value">
-                                            ${crossSegmentData.revenue.toFixed(2)}
-                                        </span>
-                                    </div>
-                                    <div className="cross-segment-stat">
-                                        <span>Avg Engagement:</span>
-                                        <span className="cross-segment-stat-value">
-                                            {crossSegmentData.avgEngagement.toFixed(1)}s
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </>
-            );
-        }
-
-        function JourneysView({ data }) {
-            const sankeyRef = useRef(null);
-
-            useEffect(() => {
-                if (!sankeyRef.current) return;
-
-                d3.select(sankeyRef.current).selectAll("*").remove();
-
-                // Build realistic conversion journey
-                const nodes = [
-                    // Entry points (0-3)
-                    { name: "Direct", id: 0 },
-                    { name: "Search", id: 1 },
-                    { name: "Social", id: 2 },
-                    { name: "Referral", id: 3 },
-                    // Landing pages (4-5)
-                    { name: "Homepage", id: 4 },
-                    { name: "Article Landing", id: 5 },
-                    // First article (6)
-                    { name: "1st Article", id: 6 },
-                    // Second article (7)
-                    { name: "2nd Article", id: 7 },
-                    // Third article (8)
-                    { name: "3rd Article", id: 8 },
-                    // Outcomes (9-10)
-                    { name: "Conversion\n$89.50 avg", id: 9 },
-                    { name: "Exit", id: 10 }
-                ];
-
-                const links = [
-                    // Entry to Landing
-                    { source: 0, target: 4, value: 45 },  // Direct -> Homepage
-                    { source: 1, target: 5, value: 55 },  // Search -> Article
-                    { source: 2, target: 5, value: 35 },  // Social -> Article
-                    { source: 3, target: 4, value: 25 },  // Referral -> Homepage
-                    
-                    // Landing to First Article
-                    { source: 4, target: 6, value: 50 },  // Homepage -> 1st Article
-                    { source: 5, target: 6, value: 70 },  // Article Landing -> 1st Article
-                    
-                    // First to Second Article (some exit)
-                    { source: 6, target: 7, value: 75 },  // 1st -> 2nd Article
-                    { source: 6, target: 10, value: 45 }, // 1st -> Exit
-                    
-                    // Second to Third Article (some exit, some convert)
-                    { source: 7, target: 8, value: 50 },  // 2nd -> 3rd Article
-                    { source: 7, target: 9, value: 15 },  // 2nd -> Conversion
-                    { source: 7, target: 10, value: 10 }, // 2nd -> Exit
-                    
-                    // Third Article outcomes (more likely to convert)
-                    { source: 8, target: 9, value: 35 },  // 3rd -> Conversion
-                    { source: 8, target: 10, value: 15 }  // 3rd -> Exit
-                ];
-
-                const width = sankeyRef.current.clientWidth;
-                const height = 600;
-                const margin = { top: 20, right: 180, bottom: 20, left: 180 };
-
-                const svg = d3.select(sankeyRef.current)
-                    .append("svg")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .append("g")
-                    .attr("transform", `translate(${margin.left},${margin.top})`);
-
-                const nodeWidth = 25;
-                const nodeHeight = 50;
-                const stageWidth = (width - margin.left - margin.right - nodeWidth * 6) / 5;
-
-                // Position nodes in journey stages
-                const positionedNodes = [
-                    // Stage 1: Entry (0-3)
-                    { name: "Direct", x: 0, y: 100 },
-                    { name: "Search", x: 0, y: 180 },
-                    { name: "Social", x: 0, y: 260 },
-                    { name: "Referral", x: 0, y: 340 },
-                    
-                    // Stage 2: Landing (4-5)
-                    { name: "Homepage", x: stageWidth, y: 150 },
-                    { name: "Article Landing", x: stageWidth, y: 250 },
-                    
-                    // Stage 3: First Article (6)
-                    { name: "1st Article", x: stageWidth * 2, y: 200 },
-                    
-                    // Stage 4: Second Article (7)
-                    { name: "2nd Article", x: stageWidth * 3, y: 200 },
-                    
-                    // Stage 5: Third Article (8)
-                    { name: "3rd Article", x: stageWidth * 4, y: 200 },
-                    
-                    // Stage 6: Outcomes (9-10)
-                    { name: "Conversion\n$89.50 avg", x: stageWidth * 5, y: 150 },
-                    { name: "Exit", x: stageWidth * 5, y: 300 }
-                ];
-
-                const color = d3.scaleOrdinal()
-                    .range([
-                        '#5eba00', // Direct - green
-                        '#0066cc', // Search - blue
-                        '#ff6b35', // Social - orange
-                        '#6a4c93', // Referral - purple
-                        '#17a2b8', // Homepage - teal
-                        '#ffc107', // Article Landing - yellow
-                        '#28a745', // 1st Article - green
-                        '#20c997', // 2nd Article - teal
-                        '#17a2b8', // 3rd Article - cyan
-                        '#5eba00', // Conversion - Parse.ly green (highlighted)
-                        '#dc3545'  // Exit - red
-                    ]);
-
-                const link = d3.linkHorizontal()
-                    .x(d => d.x)
-                    .y(d => d.y);
-
-                // Draw links with special styling for conversion paths
-                svg.append("g")
-                    .selectAll("path")
-                    .data(links)
-                    .join("path")
-                    .attr("d", d => {
-                        const sourceNode = positionedNodes[d.source];
-                        const targetNode = positionedNodes[d.target];
-                        return link({
-                            source: { x: sourceNode.x + nodeWidth, y: sourceNode.y + nodeHeight / 2 },
-                            target: { x: targetNode.x, y: targetNode.y + nodeHeight / 2 }
-                        });
-                    })
-                    .attr("stroke", d => {
-                        // Highlight conversion paths
-                        return d.target === 9 ? '#5eba00' : color(d.source);
-                    })
-                    .attr("stroke-width", d => Math.max(2, d.value / 4))
-                    .attr("fill", "none")
-                    .attr("opacity", d => d.target === 9 ? 0.7 : 0.4)
-                    .style("stroke-dasharray", d => d.target === 9 ? "0" : "0")
-                    .on("mouseover", function(event, d) {
-                        d3.select(this)
-                            .attr("opacity", 0.9)
-                            .attr("stroke-width", Math.max(3, d.value / 3));
-                        
-                        // Show tooltip
-                        const sourceNode = positionedNodes[d.source];
-                        const targetNode = positionedNodes[d.target];
-                        
-                        svg.append("text")
-                            .attr("class", "link-label")
-                            .attr("x", (sourceNode.x + targetNode.x) / 2)
-                            .attr("y", (sourceNode.y + targetNode.y) / 2 - 10)
-                            .attr("text-anchor", "middle")
-                            .style("font-size", "12px")
-                            .style("font-weight", "700")
-                            .style("fill", "#212529")
-                            .style("background", "white")
-                            .text(`${d.value} users`);
-                    })
-                    .on("mouseout", function(event, d) {
-                        d3.select(this)
-                            .attr("opacity", d.target === 9 ? 0.7 : 0.4)
-                            .attr("stroke-width", Math.max(2, d.value / 4));
-                        
-                        svg.selectAll(".link-label").remove();
-                    });
-
-                // Draw nodes
-                const nodeGroups = svg.append("g")
-                    .selectAll("g")
-                    .data(positionedNodes)
-                    .join("g")
-                    .attr("transform", d => `translate(${d.x},${d.y})`);
-
-                nodeGroups.append("rect")
-                    .attr("width", nodeWidth)
-                    .attr("height", nodeHeight)
-                    .attr("fill", (d, i) => color(i))
-                    .attr("opacity", 0.9)
-                    .attr("rx", 6)
-                    .style("stroke", (d, i) => i === 9 ? "#5eba00" : "none")
-                    .style("stroke-width", (d, i) => i === 9 ? "3" : "0");
-
-                // Add glow effect to conversion node
-                nodeGroups.filter((d, i) => i === 9)
-                    .append("rect")
-                    .attr("width", nodeWidth + 6)
-                    .attr("height", nodeHeight + 6)
-                    .attr("x", -3)
-                    .attr("y", -3)
-                    .attr("fill", "none")
-                    .attr("stroke", "#5eba00")
-                    .attr("stroke-width", 2)
-                    .attr("opacity", 0.5)
-                    .attr("rx", 8);
-
-                nodeGroups.append("text")
-                    .attr("x", nodeWidth + 10)
-                    .attr("y", nodeHeight / 2)
-                    .attr("dy", "0.35em")
-                    .attr("text-anchor", "start")
-                    .style("font-size", (d, i) => i === 9 ? "13px" : "12px")
-                    .style("font-weight", (d, i) => i === 9 ? "700" : "600")
-                    .style("fill", "#212529")
-                    .each(function(d) {
-                        const lines = d.name.split('\n');
-                        const text = d3.select(this);
-                        lines.forEach((line, i) => {
-                            text.append("tspan")
-                                .attr("x", nodeWidth + 10)
-                                .attr("dy", i === 0 ? 0 : "1.2em")
-                                .text(line);
-                        });
-                    });
-
-                // Add stage labels
-                const stages = [
-                    { x: 0, label: "Entry" },
-                    { x: stageWidth, label: "Landing" },
-                    { x: stageWidth * 2, label: "Engagement" },
-                    { x: stageWidth * 3, label: "Deep Read" },
-                    { x: stageWidth * 4, label: "Committed" },
-                    { x: stageWidth * 5, label: "Outcome" }
-                ];
-
-                svg.append("g")
-                    .selectAll("text")
-                    .data(stages)
-                    .join("text")
-                    .attr("x", d => d.x + nodeWidth / 2)
-                    .attr("y", 10)
-                    .attr("text-anchor", "middle")
-                    .style("font-size", "11px")
-                    .style("font-weight", "700")
-                    .style("fill", "#6c757d")
-                    .style("text-transform", "uppercase")
-                    .style("letter-spacing", "0.5px")
-                    .text(d => d.label);
-
-            }, [data]);
-
-            return (
-                <>
-                    <div className="header">
-                        <h1 className="page-title">User Journey Analysis</h1>
-                        <p style={{color: 'var(--parsely-gray-600)', marginTop: '0.5rem'}}>
-                            Conversion funnel showing path from entry to purchase with average order value
-                        </p>
-                    </div>
-
-                    <div className="content-section">
-                        <div style={{marginBottom: '1.5rem', padding: '1rem', background: 'var(--parsely-green-light)', border: '1px solid var(--parsely-green)', borderRadius: '8px'}}>
-                            <div style={{display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap'}}>
-                                <div>
-                                    <div style={{fontSize: '0.75rem', fontWeight: '600', color: 'var(--parsely-gray-700)', textTransform: 'uppercase', marginBottom: '0.25rem'}}>
-                                        Conversion Rate
-                                    </div>
-                                    <div style={{fontSize: '1.5rem', fontWeight: '700', color: 'var(--parsely-green-dark)'}}>
-                                        28.5%
-                                    </div>
-                                </div>
-                                <div>
-                                    <div style={{fontSize: '0.75rem', fontWeight: '600', color: 'var(--parsely-gray-700)', textTransform: 'uppercase', marginBottom: '0.25rem'}}>
-                                        Avg Order Value
-                                    </div>
-                                    <div style={{fontSize: '1.5rem', fontWeight: '700', color: 'var(--parsely-green-dark)'}}>
-                                        $89.50
-                                    </div>
-                                </div>
-                                <div>
-                                    <div style={{fontSize: '0.75rem', fontWeight: '600', color: 'var(--parsely-gray-700)', textTransform: 'uppercase', marginBottom: '0.25rem'}}>
-                                        Avg Articles Before Conversion
-                                    </div>
-                                    <div style={{fontSize: '1.5rem', fontWeight: '700', color: 'var(--parsely-green-dark)'}}>
-                                        2.8
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="sankey-container" ref={sankeyRef}></div>
-                    </div>
-                </>
-            );
-        }
-
-        function ScorecardView({ data }) {
-            return (
-                <>
-                    <div className="header">
-                        <h1 className="page-title">Golden Metrics Scorecard</h1>
-                    </div>
-
-                    <div className="content-section">
-                        <div className="scorecard-explanation">
-                            <h3>📊 How the Scorecard Works</h3>
-                            <p style={{marginBottom: '1rem', lineHeight: '1.8'}}>
-                                Each article is scored on a <strong>1-5 scale</strong> by comparing actual performance 
-                                against expected performance for similar content, positions, and contexts.
-                            </p>
-
-                            <div className="score-scale">
-                                <div className="score-item score-1">
-                                    <div className="score-number">1</div>
-                                    <div className="score-label">Significantly Below</div>
-                                    <div className="score-percentage">~8%</div>
-                                </div>
-                                <div className="score-item score-2">
-                                    <div className="score-number">2</div>
-                                    <div className="score-label">Below</div>
-                                    <div className="score-percentage">~17%</div>
-                                </div>
-                                <div className="score-item score-3">
-                                    <div className="score-number">3</div>
-                                    <div className="score-label">Meets</div>
-                                    <div className="score-percentage">~50%</div>
-                                </div>
-                                <div className="score-item score-4">
-                                    <div className="score-number">4</div>
-                                    <div className="score-label">Above</div>
-                                    <div className="score-percentage">~17%</div>
-                                </div>
-                                <div className="score-item score-5">
-                                    <div className="score-number">5</div>
-                                    <div className="score-label">Significantly Above</div>
-                                    <div className="score-percentage">~8%</div>
-                                </div>
-                            </div>
-
-                            <h4 style={{marginTop: '1.5rem', marginBottom: '0.75rem', color: 'var(--parsely-blue)'}}>
-                                Metric Explanations
-                            </h4>
-                            <ul style={{lineHeight: '2', paddingLeft: '1.5rem'}}>
-                                <li><strong>Article Interest:</strong> Click-through rate vs. expected CTR for position/time</li>
-                                <li><strong>Article Engagement:</strong> Active reading time vs. expected time for length/topic</li>
-                                <li><strong>Purposeful Reach:</strong> Traffic from high-converting sources vs. total traffic</li>
-                                <li><strong>Conversion Rate:</strong> Subscriptions/purchases from article visitors</li>
-                            </ul>
-                        </div>
-
-                        <div className="data-table-container">
-                            <table className="scorecard-table">
-                                <thead>
-                                    <tr>
-                                        <th style={{textAlign: 'left'}}>Article</th>
-                                        <th>Section</th>
-                                        <th>Interest</th>
-                                        <th>Engagement</th>
-                                        <th>Reach</th>
-                                        <th>Conversion</th>
-                                        <th>Avg</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data.slice(0, 20).map((row, idx) => {
-                                        let extraData = {};
-                                        try {
-                                            extraData = JSON.parse(row.extra_data || '{}');
-                                        } catch {}
-
-                                        const scores = {
-                                            interest: extraData.article_interest || 3,
-                                            engagement: extraData.article_engagement || 3,
-                                            reach: extraData.purposeful_reach || 3,
-                                            conversion: extraData.conversion_rate || 3
-                                        };
-                                        const avg = ((scores.interest + scores.engagement + scores.reach + scores.conversion) / 4).toFixed(1);
-
-                                        return (
-                                            <tr key={idx}>
-                                                <td style={{maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-                                                    {row.metadata_title || row.url_path || 'Untitled'}
-                                                </td>
-                                                <td>{row.metadata_section || 'N/A'}</td>
-                                                <td><span className={`score-cell score-${scores.interest}`}>{scores.interest}</span></td>
-                                                <td><span className={`score-cell score-${scores.engagement}`}>{scores.engagement}</span></td>
-                                                <td><span className={`score-cell score-${scores.reach}`}>{scores.reach}</span></td>
-                                                <td><span className={`score-cell score-${scores.conversion}`}>{scores.conversion}</span></td>
-                                                <td style={{fontWeight: 'bold', fontSize: '1rem'}}>{avg}</td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </>
-            );
-        }
-
-        ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
+            </div>
+            <div class="status-badge">
+                <div class="pulse"></div>
+                <span>Live Demos</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1 class="hero-title">
+            Explore the Power of <span class="hero-gradient">Parse.ly</span>
+        </h1>
+        <p class="hero-subtitle">
+            Interactive demos showcasing Parse.ly's analytics capabilities, API integration, and personalization features
+        </p>
+    </section>
+
+    <div class="demos-container">
+        <!-- DPL Explorer -->
+        <div class="demo-card dpl">
+            <div class="demo-icon">📊</div>
+            <h2 class="demo-title">DPL Explorer</h2>
+            <p class="demo-description">
+                Comprehensive data pipeline analytics with real-time metrics, custom golden metrics, and interactive user journey visualization.
+            </p>
+            <ul class="demo-features">
+                <li>Real-time event stream processing</li>
+                <li>Custom golden metrics creation</li>
+                <li>Interactive audience segmentation</li>
+                <li>Detailed conversion journeys</li>
+                <li>WooCommerce revenue tracking</li>
+            </ul>
+            <a href="dpl-explorer.html" class="demo-btn">
+                <span>Launch DPL Explorer</span>
+                <span>→</span>
+            </a>
+        </div>
+
+        <!-- API Browser -->
+        <div class="demo-card api">
+            <div class="demo-icon">🔌</div>
+            <h2 class="demo-title">API Browser</h2>
+            <p class="demo-description">
+                Interactive Parse.ly API explorer with live endpoint testing, request/response visualization, and comprehensive documentation.
+            </p>
+            <ul class="demo-features">
+                <li>All Parse.ly API endpoints</li>
+                <li>Live request testing</li>
+                <li>Response visualization</li>
+                <li>Authentication examples</li>
+                <li>Code generation snippets</li>
+            </ul>
+            <a href="api-browser.html" class="demo-btn">
+                <span>Launch API Browser</span>
+                <span>→</span>
+            </a>
+        </div>
+
+        <!-- Personalization Demo -->
+        <div class="demo-card personalization">
+            <div class="demo-icon">🎯</div>
+            <h2 class="demo-title">Personalization Engine</h2>
+            <p class="demo-description">
+                Experience Parse.ly's content personalization capabilities with dynamic recommendations and user-specific content delivery.
+            </p>
+            <ul class="demo-features">
+                <li>Real-time recommendations</li>
+                <li>User behavior tracking</li>
+                <li>Content affinity scoring</li>
+                <li>A/B testing simulation</li>
+                <li>Performance analytics</li>
+            </ul>
+            <a href="personalization-demo.html" class="demo-btn">
+                <span>Launch Personalization</span>
+                <span>→</span>
+            </a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">
+                These demos showcase Parse.ly's analytics and personalization capabilities
+            </p>
+            <div class="footer-links">
+                <a href="https://www.parse.ly" class="footer-link" target="_blank">Parse.ly Website</a>
+                <a href="https://docs.parse.ly" class="footer-link" target="_blank">Documentation</a>
+                <a href="https://www.parse.ly/contact" class="footer-link" target="_blank">Contact Sales</a>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
