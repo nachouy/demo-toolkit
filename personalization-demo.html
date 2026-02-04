@@ -279,21 +279,29 @@
       border-radius: 8px;
       padding: 1rem;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
       position: relative;
       overflow: hidden;
+      user-select: none;
     }
 
-    .article-card:hover {
+    .article-card:hover:not(.read) {
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg);
       border-color: var(--parsely-green);
+      background: rgba(0, 208, 132, 0.02);
+    }
+
+    .article-card:active:not(.read) {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
 
     .article-card.reading {
-      animation: reading 1s ease-in-out;
+      animation: reading 0.8s ease-in-out;
       border-color: var(--parsely-green);
-      background: rgba(0, 208, 132, 0.05);
+      background: rgba(0, 208, 132, 0.1);
+      pointer-events: none;
     }
 
     @keyframes reading {
@@ -304,6 +312,13 @@
     .article-card.read {
       opacity: 0.6;
       border-color: var(--parsely-green);
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .article-card.read:hover {
+      transform: none;
+      box-shadow: none;
     }
 
     .article-card.recommended {
@@ -618,9 +633,10 @@
   <div class="demo-container">
     <!-- Controls -->
     <div class="controls">
-      <button class="btn btn-primary" onclick="startDemo()">▶ Start Demo</button>
-      <button class="btn btn-secondary" onclick="resetDemo()">↻ Reset</button>
-      <button class="btn btn-secondary" onclick="skipToRecommendations()">⏭ Skip to Recommendations</button>
+      <button class="btn btn-secondary" onclick="resetDemo()">↻ Reset Demo</button>
+      <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+        Click on any article below to start reading
+      </p>
     </div>
 
     <!-- Steps -->
@@ -628,7 +644,7 @@
       <div class="step" id="step1">
         <div class="step-number">1</div>
         <div class="step-title">User Reads Articles</div>
-        <div class="step-description">When a user reads an article, fire a request to /profile with their UUID and the article URL. Parse.ly learns their interests.</div>
+        <div class="step-description">Click on articles below to simulate reading. Parse.ly tracks each article view and learns user interests through the /profile API endpoint.</div>
       </div>
       <div class="step" id="step2">
         <div class="step-number">2</div>
@@ -750,11 +766,12 @@
     ];
 
     let readArticles = [];
-    let currentStep = 0;
+    let currentStep = 1; // Start at step 1 - ready for user to read articles
     let demoRunning = false;
     let interests = {};
 
     function initDemo() {
+      setStep(1); // Highlight step 1 as active
       renderArticles();
     }
 
@@ -776,17 +793,28 @@
       
       const article = articles.find(a => a.id === id);
       if (!article || readArticles.includes(id)) return;
+      
+      // Prevent multiple clicks on same article
+      readArticles.push(id);
 
       // Animate reading
       const card = document.getElementById(`article-${id}`);
+      if (!card) return;
+      
+      card.style.pointerEvents = 'none'; // Disable further clicks
       card.classList.add('reading');
       
       setTimeout(() => {
         card.classList.remove('reading');
         card.classList.add('read');
-        card.innerHTML += '<div class="badge read">✓ Read</div>';
         
-        readArticles.push(id);
+        // Add read badge if not already there
+        if (!card.querySelector('.badge.read')) {
+          const badge = document.createElement('div');
+          badge.className = 'badge read';
+          badge.textContent = '✓ Read';
+          card.appendChild(badge);
+        }
         
         // Update interests
         updateInterests(article);
@@ -804,9 +832,9 @@
         
         // Show recommendations if 3+ articles read
         if (readArticles.length >= 3) {
-          setTimeout(() => showRecommendations(), 1000);
+          setTimeout(() => showRecommendations(), 500);
         }
-      }, 1000);
+      }, 800); // Reduced from 1000ms to 800ms for faster feedback
     }
 
     function updateInterests(article) {
@@ -972,56 +1000,34 @@ fetch(<span class="code-string">'/related?apikey=site.com&uuid=user-sarah-123&li
       }
     }
 
-    async function startDemo() {
-      if (demoRunning) return;
-      demoRunning = true;
-      
-      setStep(1);
-      
-      // Simulate reading articles from different categories
-      // 3 Technology, 2 Environment, 1 Lifestyle
-      const articlesToRead = [1, 2, 3, 7, 8, 13];
-      
-      for (let i = 0; i < articlesToRead.length; i++) {
-        await sleep(2000);
-        readArticle(articlesToRead[i]);
-      }
-      
-      demoRunning = false;
-    }
+    // Removed: startDemo() and skipToRecommendations() functions
+    // Users now manually click articles to interact with the demo
 
     function resetDemo() {
       readArticles = [];
       interests = {};
-      currentStep = 0;
+      currentStep = 1; // Reset to step 1, ready for interaction
       demoRunning = false;
+      
+      // Reset all article cards
+      document.querySelectorAll('.article-card').forEach(card => {
+        card.classList.remove('read', 'reading', 'recommended');
+        card.style.pointerEvents = 'auto';
+        const badge = card.querySelector('.badge.read');
+        if (badge) badge.remove();
+      });
       
       document.getElementById('userProfile').style.display = 'none';
       document.getElementById('recommendations').style.display = 'none';
       document.getElementById('apiTimeline').style.display = 'none';
       document.getElementById('timelineContent').innerHTML = '';
       
-      setStep(0);
+      setStep(1); // Highlight step 1 as active
       renderArticles();
       
       document.getElementById('statArticles').textContent = '0';
       document.getElementById('statInterests').textContent = '0';
       document.getElementById('statRecommendations').textContent = '0';
-    }
-
-    async function skipToRecommendations() {
-      resetDemo();
-      demoRunning = true;
-      
-      // Read 3 Tech, 2 Environment, 1 Lifestyle
-      const articlesToRead = [1, 2, 3, 7, 8, 13];
-      
-      for (let i = 0; i < articlesToRead.length; i++) {
-        readArticle(articlesToRead[i]);
-        await sleep(500);
-      }
-      
-      demoRunning = false;
     }
 
     function sleep(ms) {
