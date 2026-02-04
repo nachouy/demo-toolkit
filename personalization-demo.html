@@ -31,6 +31,36 @@
       color: var(--text-primary);
       padding: 2rem;
       line-height: 1.6;
+      position: relative;
+    }
+
+    .back-home-btn {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      background: var(--bg-white);
+      color: var(--text-primary);
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+      z-index: 1000;
+      white-space: nowrap;
+    }
+
+    .back-home-btn:hover {
+      background: var(--parsely-green);
+      color: white;
+      border-color: var(--parsely-green);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 217, 132, 0.3);
     }
 
     .header {
@@ -54,29 +84,6 @@
       font-size: 1.125rem;
       color: var(--text-secondary);
       margin-bottom: 2rem;
-    }
-
-    .back-home-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      background: var(--bg-white);
-      color: var(--text-primary);
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      border: 1px solid var(--border-color);
-      margin-bottom: 2rem;
-    }
-
-    .back-home-btn:hover {
-      background: var(--parsely-green);
-      color: white;
-      border-color: var(--parsely-green);
-      transform: translateX(-2px);
     }
 
     .demo-container {
@@ -597,10 +604,12 @@
   </style>
 </head>
 <body>
+<body>
+  <a href="index.html" class="back-home-btn">
+    ← Home
+  </a>
+
   <div class="header">
-    <a href="index.html" class="back-home-btn">
-      ← Back to Home
-    </a>
     <img src="https://www.parse.ly/wp-content/uploads/sites/6/2023/12/parsely-logo.svg" alt="Parse.ly" class="logo">
     <h1>Personalization Demo</h1>
     <p class="subtitle">See how Parse.ly's AI learns user preferences and delivers personalized content recommendations</p>

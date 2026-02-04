@@ -89,7 +89,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.625rem 1.25rem;
+      padding: 0.625rem 1rem;
       background: var(--bg-light);
       color: var(--text-primary);
       text-decoration: none;
@@ -98,13 +98,15 @@
       font-weight: 600;
       transition: all 0.2s ease;
       border: 1px solid var(--border-color);
+      white-space: nowrap;
     }
 
     .back-home-btn:hover {
       background: var(--parsely-green);
       color: white;
       border-color: var(--parsely-green);
-      transform: translateX(-2px);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 217, 132, 0.3);
     }
 
     .container {
@@ -794,7 +796,7 @@
         <img src="https://www.parse.ly/wp-content/uploads/sites/6/2023/12/parsely-logo.svg" alt="Parse.ly" class="logo" />
       </div>
       <a href="index.html" class="back-home-btn">
-        ← Back to Home
+        ← Home
       </a>
     </div>
   </div>
