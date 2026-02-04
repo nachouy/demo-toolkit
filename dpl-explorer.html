@@ -1259,7 +1259,9 @@
                 name: '',
                 description: '',
                 metric_type: 'sum',
-                field: 'engaged_time_inc'
+                field: 'engaged_time_inc',
+                chart_type: 'bar',
+                field2: 'revenue'
             });
 
             const handleCreateMetric = () => {
@@ -1270,7 +1272,9 @@
                     name: '',
                     description: '',
                     metric_type: 'sum',
-                    field: 'engaged_time_inc'
+                    field: 'engaged_time_inc',
+                    chart_type: 'bar',
+                    field2: 'revenue'
                 });
                 setShowModal(false);
             };
@@ -1465,88 +1469,182 @@
                     chartInstance.current.destroy();
                 }
 
-                // Calculate metric by country
-                const metricByCountry = {};
-                
-                data.forEach(row => {
-                    const country = row.ip_country || 'Unknown';
-                    
-                    if (!metricByCountry[country]) {
-                        metricByCountry[country] = { values: [], count: 0 };
-                    }
+                const chartType = metric.chart_type || 'bar';
 
-                    let value = 0;
-                    if (metric.field === 'revenue') {
+                // Helper function to get metric value
+                const getMetricValue = (row, field) => {
+                    if (field === 'revenue') {
                         try {
                             const extraData = JSON.parse(row.extra_data || '{}');
-                            value = parseFloat(extraData.woocommerce_payment_amount || 0);
-                        } catch {}
-                    } else if (metric.field === 'engaged_time_inc') {
-                        value = parseInt(row.engaged_time_inc || 0);
+                            return parseFloat(extraData.woocommerce_payment_amount || 0);
+                        } catch { return 0; }
+                    } else if (field === 'engaged_time_inc') {
+                        return parseInt(row.engaged_time_inc || 0);
                     } else {
                         try {
                             const extraData = JSON.parse(row.extra_data || '{}');
-                            value = parseFloat(extraData[metric.field] || 0);
-                        } catch {}
+                            return parseFloat(extraData[field] || 0);
+                        } catch { return 0; }
                     }
+                };
 
-                    metricByCountry[country].values.push(value);
-                    metricByCountry[country].count += 1;
-                });
-
-                // Calculate based on metric type
-                const labels = Object.keys(metricByCountry).slice(0, 10);
-                const chartData = labels.map(country => {
-                    const { values, count } = metricByCountry[country];
+                if (chartType === 'scatter') {
+                    // Scatter plot with 2 metrics
+                    const metricsByCountry = {};
                     
-                    switch (metric.metric_type) {
-                        case 'sum':
-                            return values.reduce((a, b) => a + b, 0);
-                        case 'average':
-                            return values.reduce((a, b) => a + b, 0) / count;
-                        case 'count':
-                            return count;
-                        case 'max':
-                            return Math.max(...values);
-                        case 'min':
-                            return Math.min(...values);
-                        default:
-                            return values.reduce((a, b) => a + b, 0);
-                    }
-                });
+                    data.forEach(row => {
+                        const country = row.ip_country || 'Unknown';
+                        if (!metricsByCountry[country]) {
+                            metricsByCountry[country] = { values1: [], values2: [], count: 0 };
+                        }
+                        metricsByCountry[country].values1.push(getMetricValue(row, metric.field));
+                        metricsByCountry[country].values2.push(getMetricValue(row, metric.field2 || 'revenue'));
+                        metricsByCountry[country].count += 1;
+                    });
 
-                chartInstance.current = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: metric.name,
-                            data: chartData,
-                            backgroundColor: 'rgba(94, 186, 0, 0.7)',
-                            borderColor: '#5eba00',
-                            borderWidth: 2,
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
+                    const countries = Object.keys(metricsByCountry).slice(0, 10);
+                    const scatterData = countries.map(country => {
+                        const { values1, values2, count } = metricsByCountry[country];
+                        let x = 0, y = 0;
+                        
+                        switch (metric.metric_type) {
+                            case 'sum':
+                                x = values1.reduce((a, b) => a + b, 0);
+                                y = values2.reduce((a, b) => a + b, 0);
+                                break;
+                            case 'average':
+                                x = values1.reduce((a, b) => a + b, 0) / count;
+                                y = values2.reduce((a, b) => a + b, 0) / count;
+                                break;
+                            default:
+                                x = values1.reduce((a, b) => a + b, 0);
+                                y = values2.reduce((a, b) => a + b, 0);
+                        }
+
+                        return { x, y, label: country };
+                    });
+
+                    chartInstance.current = new Chart(ctx, {
+                        type: 'scatter',
+                        data: {
+                            datasets: [{
+                                label: metric.name,
+                                data: scatterData,
+                                backgroundColor: 'rgba(94, 186, 0, 0.6)',
+                                borderColor: '#5eba00',
+                                borderWidth: 2,
+                                pointRadius: 8,
+                                pointHoverRadius: 10
+                            }]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: '#e9ecef' },
-                                ticks: { color: '#6c757d' }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) => {
+                                            const point = context.raw;
+                                            return `${point.label}: (${point.x.toFixed(1)}, ${point.y.toFixed(1)})`;
+                                        }
+                                    }
+                                }
                             },
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#6c757d' }
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: '#e9ecef' },
+                                    ticks: { color: '#6c757d' },
+                                    title: {
+                                        display: true,
+                                        text: metric.field2 || 'Secondary Metric',
+                                        color: '#495057',
+                                        font: { weight: '600' }
+                                    }
+                                },
+                                x: {
+                                    beginAtZero: true,
+                                    grid: { color: '#e9ecef' },
+                                    ticks: { color: '#6c757d' },
+                                    title: {
+                                        display: true,
+                                        text: metric.field || 'Primary Metric',
+                                        color: '#495057',
+                                        font: { weight: '600' }
+                                    }
+                                }
                             }
                         }
-                    }
-                });
+                    });
+
+                } else {
+                    // Bar or Line chart (single metric)
+                    const metricByCountry = {};
+                    
+                    data.forEach(row => {
+                        const country = row.ip_country || 'Unknown';
+                        if (!metricByCountry[country]) {
+                            metricByCountry[country] = { values: [], count: 0 };
+                        }
+                        metricByCountry[country].values.push(getMetricValue(row, metric.field));
+                        metricByCountry[country].count += 1;
+                    });
+
+                    const labels = Object.keys(metricByCountry).slice(0, 10);
+                    const chartData = labels.map(country => {
+                        const { values, count } = metricByCountry[country];
+                        
+                        switch (metric.metric_type) {
+                            case 'sum':
+                                return values.reduce((a, b) => a + b, 0);
+                            case 'average':
+                                return values.reduce((a, b) => a + b, 0) / count;
+                            case 'count':
+                                return count;
+                            case 'max':
+                                return Math.max(...values);
+                            case 'min':
+                                return Math.min(...values);
+                            default:
+                                return values.reduce((a, b) => a + b, 0);
+                        }
+                    });
+
+                    chartInstance.current = new Chart(ctx, {
+                        type: chartType === 'line' ? 'line' : 'bar',
+                        data: {
+                            labels,
+                            datasets: [{
+                                label: metric.name,
+                                data: chartData,
+                                backgroundColor: 'rgba(94, 186, 0, 0.7)',
+                                borderColor: '#5eba00',
+                                borderWidth: 2,
+                                borderRadius: chartType === 'bar' ? 8 : 0,
+                                tension: chartType === 'line' ? 0.4 : 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: '#e9ecef' },
+                                    ticks: { color: '#6c757d' }
+                                },
+                                x: {
+                                    grid: { display: chartType === 'line' },
+                                    ticks: { color: '#6c757d' }
+                                }
+                            }
+                        }
+                    });
+                }
 
                 return () => {
                     if (chartInstance.current) {
