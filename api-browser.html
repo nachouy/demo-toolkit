@@ -85,6 +85,28 @@
       font-weight: 500;
     }
 
+    .back-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      background: var(--bg-light);
+      color: var(--text-primary);
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-color);
+    }
+
+    .back-home-btn:hover {
+      background: var(--parsely-green);
+      color: white;
+      border-color: var(--parsely-green);
+      transform: translateX(-2px);
+    }
+
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -771,7 +793,9 @@
       <div class="logo-container">
         <img src="https://www.parse.ly/wp-content/uploads/sites/6/2023/12/parsely-logo.svg" alt="Parse.ly" class="logo" />
       </div>
-      <div class="header-subtitle">API Explorer</div>
+      <a href="index.html" class="back-home-btn">
+        ← Back to Home
+      </a>
     </div>
   </div>
 

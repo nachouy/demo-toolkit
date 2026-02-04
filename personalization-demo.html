@@ -56,6 +56,29 @@
       margin-bottom: 2rem;
     }
 
+    .back-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-white);
+      color: var(--text-primary);
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+
+    .back-home-btn:hover {
+      background: var(--parsely-green);
+      color: white;
+      border-color: var(--parsely-green);
+      transform: translateX(-2px);
+    }
+
     .demo-container {
       max-width: 1400px;
       margin: 0 auto;
@@ -575,6 +598,9 @@
 </head>
 <body>
   <div class="header">
+    <a href="index.html" class="back-home-btn">
+      ← Back to Home
+    </a>
     <img src="https://www.parse.ly/wp-content/uploads/sites/6/2023/12/parsely-logo.svg" alt="Parse.ly" class="logo">
     <h1>Personalization Demo</h1>
     <p class="subtitle">See how Parse.ly's AI learns user preferences and delivers personalized content recommendations</p>
