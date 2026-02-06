@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parse.ly Data Pipeline - Industry Verticals</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parsely-green: #70A452;
+            --parsely-green-dark: #5c8f43;
+            --parsely-green-light: #edf5e8;
+            --parsely-blue: #0066cc;
+            --parsely-blue-light: #e6f2ff;
+            --parsely-navy: #1a2332;
+            --parsely-gray-50: #f8f9fa;
+            --parsely-gray-100: #e9ecef;
+            --parsely-gray-200: #dee2e6;
+            --parsely-gray-300: #ced4da;
+            --parsely-gray-600: #6c757d;
+            --parsely-gray-700: #495057;
+            --parsely-gray-900: #212529;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fbfbfb;
+            color: var(--parsely-gray-900);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+
+        /* Floating Navbar */
+        .parsely-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .parsely-nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .parsely-nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--parsely-gray-900);
+        }
+
+        .parsely-nav-logo img {
+            height: 24px;
+            width: auto;
+        }
+
+        .parsely-nav-divider {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--parsely-gray-600);
+            border-left: 1px solid var(--parsely-gray-200);
+            padding-left: 0.75rem;
+        }
+
+        .parsely-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .parsely-nav-link {
+            padding: 0.5rem 0.875rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--parsely-gray-600);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .parsely-nav-link:hover {
+            color: var(--parsely-green);
+            background: var(--parsely-green-light);
+        }
+
+        .parsely-nav-link.active {
+            color: var(--parsely-green-dark);
+            background: var(--parsely-green-light);
+            font-weight: 600;
+        }
+
+        /* Page Header */
+        .page-header {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--parsely-gray-900);
+            margin-bottom: 0.75rem;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .page-title .gradient {
+            background: linear-gradient(135deg, var(--parsely-green), var(--parsely-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--parsely-gray-600);
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .skip-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: var(--parsely-green);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.938rem;
+            transition: color 0.2s ease;
+        }
+
+        .skip-link:hover {
+            color: var(--parsely-green-dark);
+            text-decoration: underline;
+        }
+
+        /* Vertical Tabs */
+        .tabs-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .tabs {
+            display: inline-flex;
+            background: var(--parsely-gray-100);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            padding: 0.625rem 1.5rem;
+            font-size: 0.938rem;
+            font-weight: 600;
+            color: var(--parsely-gray-600);
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover {
+            color: var(--parsely-gray-900);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .tab-btn.active {
+            color: white;
+            background: var(--parsely-green);
+            box-shadow: 0 2px 8px rgba(112, 164, 82, 0.3);
+        }
+
+        /* Carousel Container */
+        .carousel-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem 3rem;
+        }
+
+        .carousel-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border: 2px solid var(--parsely-gray-200);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .carousel-viewport {
+            overflow: hidden;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide {
+            min-width: 100%;
+            padding: 2.5rem;
+        }
+
+        .slide-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .slide-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--parsely-gray-900);
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .slide-bullets {
+            list-style: none;
+            margin-bottom: 0;
+        }
+
+        .slide-bullets li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.975rem;
+            color: var(--parsely-gray-700);
+            line-height: 1.5;
+        }
+
+        .slide-bullets li:last-child {
+            margin-bottom: 0;
+        }
+
+        .slide-bullets li::before {
+            content: '\2713';
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--parsely-green-light);
+            color: var(--parsely-green-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Carousel Navigation */
+        .carousel-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 2.5rem 2rem;
+            border-top: 1px solid var(--parsely-gray-100);
+        }
+
+        .carousel-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .carousel-arrow {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--parsely-gray-200);
+            background: white;
+            color: var(--parsely-gray-700);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .carousel-arrow:hover:not(:disabled) {
+            border-color: var(--parsely-green);
+            color: var(--parsely-green);
+            background: var(--parsely-green-light);
+        }
+
+        .carousel-arrow:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .carousel-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: none;
+            background: var(--parsely-gray-200);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            padding: 0;
+        }
+
+        .carousel-dot.active {
+            background: var(--parsely-green);
+            transform: scale(1.2);
+        }
+
+        .carousel-dot:hover:not(.active) {
+            background: var(--parsely-gray-300);
+        }
+
+        /* CTA Button */
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--parsely-green);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.938rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(112, 164, 82, 0.25);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(112, 164, 82, 0.35);
+            background: var(--parsely-green-dark);
+        }
+
+        .cta-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-top: 2px solid var(--parsely-gray-200);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-text {
+            color: var(--parsely-gray-600);
+            font-size: 0.938rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--parsely-green);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--parsely-green-dark);
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.875rem;
+            }
+
+            .parsely-nav-content {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .parsely-nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .tabs {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .tabs-container {
+                padding: 0 1rem 1.5rem;
+            }
+
+            .tab-btn {
+                text-align: center;
+            }
+
+            .carousel-wrapper {
+                padding: 0 1rem 3rem;
+            }
+
+            .slide {
+                padding: 1.5rem;
+            }
+
+            .carousel-footer {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.25rem 1.5rem 1.5rem;
+            }
+
+            .carousel-nav {
+                order: 2;
+            }
+
+            .cta-btn {
+                order: 1;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-header {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .tabs-container {
+            animation: fadeInUp 0.5s ease-out 0.1s backwards;
+        }
+
+        .carousel-card {
+            animation: fadeInUp 0.5s ease-out 0.2s backwards;
+        }
+    </style>
+</head>
+<body>
+    <nav class="parsely-nav">
+        <div class="parsely-nav-content">
+            <a href="index.html" class="parsely-nav-logo">
+                <img src="https://www.parse.ly/wp-content/uploads/sites/6/2023/12/parsely-logo.svg" alt="Parse.ly" />
+                <span class="parsely-nav-divider">Demo Hub</span>
+            </a>
+            <div class="parsely-nav-links">
+                <a href="index.html" class="parsely-nav-link">Home</a>
+                <a href="dpl-verticals.html" class="parsely-nav-link active">DPL Explorer</a>
+                <a href="api-browser.html" class="parsely-nav-link">API Browser</a>
+                <a href="personalization-demo.html" class="parsely-nav-link">Personalization</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <h1 class="page-title">Parse.ly <span class="gradient">Data Pipeline</span></h1>
+        <p class="page-subtitle">See how Parse.ly's data pipeline powers content intelligence across industries</p>
+        <a href="dpl-explorer.html" class="skip-link">Skip to Explorer <span>&rarr;</span></a>
+    </header>
+
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-vertical="corporate">Corporate</button>
+            <button class="tab-btn" data-vertical="media">Media</button>
+            <button class="tab-btn" data-vertical="finserv">FinServ</button>
+        </div>
+    </div>
+
+    <div class="carousel-wrapper">
+        <div class="carousel-card">
+            <div class="carousel-viewport">
+                <div class="carousel-track" id="carouselTrack">
+                    <!-- Slides rendered by JS -->
+                </div>
+            </div>
+            <div class="carousel-footer">
+                <div class="carousel-nav">
+                    <button class="carousel-arrow" id="prevBtn" aria-label="Previous slide">&lsaquo;</button>
+                    <div class="carousel-dots" id="carouselDots"></div>
+                    <button class="carousel-arrow" id="nextBtn" aria-label="Next slide">&rsaquo;</button>
+                </div>
+                <a href="dpl-explorer.html" class="cta-btn">
+                    Launch DPL Explorer <span>&rarr;</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">
+                These demos showcase Parse.ly's analytics and personalization capabilities
+            </p>
+            <div class="footer-links">
+                <a href="https://www.parse.ly" class="footer-link" target="_blank">Parse.ly Website</a>
+                <a href="https://docs.parse.ly" class="footer-link" target="_blank">Documentation</a>
+                <a href="https://www.parse.ly/contact" class="footer-link" target="_blank">Contact Sales</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const slides = {
+            corporate: [
+                {
+                    icon: '\uD83C\uDFE2',
+                    title: 'Understand Your Audience at Scale',
+                    bullets: [
+                        'Track engagement across all corporate content: blogs, knowledge bases, investor relations',
+                        'Measure how employees, customers, and prospects interact with your content',
+                        'Identify which topics and formats drive the most engagement'
+                    ]
+                },
+                {
+                    icon: '\uD83D\uDCCA',
+                    title: 'Data-Driven Content Strategy',
+                    bullets: [
+                        'Score content performance with golden metrics (Interest, Engagement, Reach, Conversion)',
+                        'Identify what resonates with decision-makers and C-suite',
+                        'Optimize content investment based on real audience data'
+                    ]
+                },
+                {
+                    icon: '\uD83D\uDCB0',
+                    title: 'Prove Content ROI',
+                    bullets: [
+                        'Connect content engagement to business outcomes',
+                        'Track conversions from content to lead generation, product signups, revenue',
+                        'Report content impact to stakeholders with clear attribution data'
+                    ]
+                }
+            ],
+            media: [
+                {
+                    icon: '\uD83D\uDCF0',
+                    title: 'Real-Time Audience Intelligence',
+                    bullets: [
+                        'Monitor content performance as it happens across your newsroom',
+                        'See which stories are trending, which authors drive engagement',
+                        'Understand where your audience comes from (search, social, direct, referral)'
+                    ]
+                },
+                {
+                    icon: '\uD83C\uDFAF',
+                    title: 'Personalize the Reader Experience',
+                    bullets: [
+                        'Deliver the right content to the right reader using Parse.ly recommendations',
+                        'Increase time on site, pageviews per session, and return visits',
+                        'Build loyalty through personalized newsletters and homepages'
+                    ]
+                },
+                {
+                    icon: '\uD83D\uDCC8',
+                    title: 'Monetize Engagement Data',
+                    bullets: [
+                        'Identify which content drives subscriptions and ad revenue',
+                        'Discover high-value audience segments for premium ad placements',
+                        'Optimize the balance between reach, engagement, and monetization'
+                    ]
+                }
+            ],
+            finserv: [
+                {
+                    icon: '\uD83C\uDFE6',
+                    title: 'Content Analytics for Financial Services',
+                    bullets: [
+                        'Track how clients consume research reports, market commentary, and educational content',
+                        'Monitor engagement with regulatory communications and compliance materials',
+                        'Understand content performance across institutional and retail audiences'
+                    ]
+                },
+                {
+                    icon: '\uD83D\uDDFA\uFE0F',
+                    title: 'Client Journey Intelligence',
+                    bullets: [
+                        'Map the path from educational content to account opening and AUM growth',
+                        'Identify which topics drive high-net-worth prospects and institutional investors',
+                        "Measure content\u2019s impact on client acquisition and retention"
+                    ]
+                }
+            ]
+        };
+
+        let selectedVertical = 'corporate';
+        let currentSlide = 0;
+
+        const track = document.getElementById('carouselTrack');
+        const dotsContainer = document.getElementById('carouselDots');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+
+        function renderSlides() {
+            const verticalSlides = slides[selectedVertical];
+            track.innerHTML = verticalSlides.map(function(slide) {
+                return '<div class="slide">' +
+                    '<div class="slide-icon">' + slide.icon + '</div>' +
+                    '<h2 class="slide-title">' + slide.title + '</h2>' +
+                    '<ul class="slide-bullets">' +
+                    slide.bullets.map(function(b) { return '<li>' + b + '</li>'; }).join('') +
+                    '</ul>' +
+                '</div>';
+            }).join('');
+
+            dotsContainer.innerHTML = verticalSlides.map(function(_, i) {
+                return '<button class="carousel-dot' + (i === currentSlide ? ' active' : '') + '" data-index="' + i + '" aria-label="Go to slide ' + (i + 1) + '"></button>';
+            }).join('');
+
+            updatePosition();
+        }
+
+        function updatePosition() {
+            track.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+
+            var dots = dotsContainer.querySelectorAll('.carousel-dot');
+            dots.forEach(function(dot, i) {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+
+            var total = slides[selectedVertical].length;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === total - 1;
+        }
+
+        function goToSlide(index) {
+            var total = slides[selectedVertical].length;
+            if (index < 0 || index >= total) return;
+            currentSlide = index;
+            updatePosition();
+        }
+
+        function selectVertical(vertical) {
+            selectedVertical = vertical;
+            currentSlide = 0;
+
+            tabBtns.forEach(function(btn) {
+                btn.classList.toggle('active', btn.dataset.vertical === vertical);
+            });
+
+            renderSlides();
+        }
+
+        // Event listeners
+        prevBtn.addEventListener('click', function() {
+            goToSlide(currentSlide - 1);
+        });
+
+        nextBtn.addEventListener('click', function() {
+            goToSlide(currentSlide + 1);
+        });
+
+        dotsContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('carousel-dot')) {
+                goToSlide(parseInt(e.target.dataset.index, 10));
+            }
+        });
+
+        tabBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                selectVertical(this.dataset.vertical);
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
+            if (e.key === 'ArrowRight') goToSlide(currentSlide + 1);
+        });
+
+        // Init
+        renderSlides();
+    </script>
+</body>
+</html>
