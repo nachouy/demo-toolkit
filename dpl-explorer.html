@@ -1942,37 +1942,39 @@
             return <div ref={heatRef} style={{marginTop: '1.5rem'}}></div>;
         }
 
-        // Heatmap: Topics by Custom Audience Segment (rows=topics, cols=segments, value=engagement)
+        // Heatmap: Topics by Time, filtered by Custom Audience Segment selector
         function HeatmapTopicsByAudience({ data }) {
             const heatRef = useRef(null);
+            const [selectedSeg, setSelectedSeg] = useState(AUDIENCE_SEGMENTS[0]);
 
             useEffect(() => {
                 if (!heatRef.current) return;
                 d3.select(heatRef.current).selectAll("*").remove();
 
                 const topics = ['News', 'Sports', 'Politics', 'Tech', 'Culture'];
-                const segments = AUDIENCE_SEGMENTS;
+                const hours = Array.from({length: 24}, (_, i) => i);
 
-                // Avg engagement per topic per segment
-                const matrix = topics.map(() => segments.map(() => ({ total: 0, count: 0 })));
-                data.forEach(d => {
-                    if (!d.metadata_section) return;
+                // Filter data by selected audience segment
+                const filtered = data.filter(d => {
+                    try { return JSON.parse(d.extra_data || '{}').audience_segment === selectedSeg; } catch { return false; }
+                });
+
+                const matrix = topics.map(() => hours.map(() => ({ total: 0, count: 0 })));
+                filtered.forEach(d => {
+                    if (!d.metadata_section || !d.ts_action) return;
                     const ti = topics.indexOf(d.metadata_section);
                     if (ti < 0) return;
-                    let seg;
-                    try { seg = JSON.parse(d.extra_data || '{}').audience_segment; } catch { return; }
-                    const si = segments.indexOf(seg);
-                    if (si < 0) return;
-                    matrix[ti][si].total += parseInt(d.engaged_time_inc) || 0;
-                    matrix[ti][si].count++;
+                    const hour = new Date(d.ts_action).getHours();
+                    matrix[ti][hour].total += parseInt(d.engaged_time_inc) || 0;
+                    matrix[ti][hour].count++;
                 });
 
                 const avgMatrix = matrix.map(row => row.map(cell => cell.count > 0 ? cell.total / cell.count : 0));
                 const maxVal = Math.max(1, ...avgMatrix.flat());
                 const width = heatRef.current.clientWidth;
-                const cellW = Math.max(60, (width - 90) / segments.length);
-                const cellH = 42;
-                const margin = { top: 60, left: 80 };
+                const cellW = Math.max(16, (width - 90) / 24);
+                const cellH = 36;
+                const margin = { top: 30, left: 80 };
                 const height = margin.top + topics.length * cellH + 20;
 
                 const svg = d3.select(heatRef.current).append("svg").attr("width", width).attr("height", height);
@@ -1985,30 +1987,20 @@
                     .style("pointer-events", "none").style("opacity", 0).style("z-index", 9999).attr("class", "hm-topic-aud-tip");
 
                 topics.forEach((topic, ti) => {
-                    segments.forEach((seg, si) => {
+                    hours.forEach((hour, hi) => {
                         g.append("rect")
-                            .attr("x", si * cellW).attr("y", ti * cellH)
-                            .attr("width", cellW - 3).attr("height", cellH - 3)
-                            .attr("rx", 4).attr("fill", colorScale(avgMatrix[ti][si]))
+                            .attr("x", hi * cellW).attr("y", ti * cellH)
+                            .attr("width", cellW - 2).attr("height", cellH - 2)
+                            .attr("rx", 3).attr("fill", colorScale(avgMatrix[ti][hi]))
                             .style("cursor", "pointer")
                             .on("mouseover", function(event) {
-                                tooltip.html(`<strong>${topic}</strong> × <strong>${seg}</strong><br/>Avg engagement: ${avgMatrix[ti][si].toFixed(1)}s<br/>${matrix[ti][si].count} events`)
+                                tooltip.html(`<strong>${topic}</strong> at ${hour}:00<br/><em>${selectedSeg}</em><br/>Avg engagement: ${avgMatrix[ti][hi].toFixed(1)}s<br/>${matrix[ti][hi].count} events`)
                                     .style("left", (event.pageX + 12) + "px").style("top", (event.pageY - 28) + "px").style("opacity", 1);
                             })
                             .on("mousemove", function(event) {
                                 tooltip.style("left", (event.pageX + 12) + "px").style("top", (event.pageY - 28) + "px");
                             })
                             .on("mouseout", function() { tooltip.style("opacity", 0); });
-
-                        // Show value inside cell
-                        if (avgMatrix[ti][si] > 0) {
-                            g.append("text")
-                                .attr("x", si * cellW + (cellW - 3) / 2).attr("y", ti * cellH + (cellH - 3) / 2)
-                                .attr("text-anchor", "middle").attr("dy", "0.35em")
-                                .style("font-size", "11px").style("font-weight", "700")
-                                .style("fill", avgMatrix[ti][si] > maxVal * 0.6 ? "white" : "#495057")
-                                .text(avgMatrix[ti][si].toFixed(0) + 's');
-                        }
                     });
                     g.append("text").attr("x", -8).attr("y", ti * cellH + cellH / 2)
                         .attr("text-anchor", "end").attr("dy", "0.35em")
@@ -2016,20 +2008,38 @@
                         .text(topic);
                 });
 
-                // Column headers (rotated)
-                segments.forEach((seg, si) => {
-                    g.append("text")
-                        .attr("x", si * cellW + (cellW - 3) / 2).attr("y", -10)
-                        .attr("text-anchor", "end")
-                        .attr("transform", `rotate(-35, ${si * cellW + (cellW - 3) / 2}, -10)`)
-                        .style("font-size", "11px").style("font-weight", "600").style("fill", "#495057")
-                        .text(seg);
+                hours.forEach(h => {
+                    if (h % 3 === 0) {
+                        g.append("text").attr("x", h * cellW + cellW / 2).attr("y", -8)
+                            .attr("text-anchor", "middle")
+                            .style("font-size", "10px").style("fill", "#6c757d")
+                            .text(`${h}:00`);
+                    }
                 });
 
                 return () => { d3.selectAll(".hm-topic-aud-tip").remove(); };
-            }, [data]);
+            }, [data, selectedSeg]);
 
-            return <div ref={heatRef} style={{marginTop: '1.5rem'}}></div>;
+            return (
+                <div>
+                    <div style={{display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem'}}>
+                        {AUDIENCE_SEGMENTS.map(seg => (
+                            <div key={seg}
+                                onClick={() => setSelectedSeg(seg)}
+                                style={{
+                                    padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 600,
+                                    cursor: 'pointer', transition: 'all 0.2s',
+                                    background: selectedSeg === seg ? '#7c3aed' : 'white',
+                                    color: selectedSeg === seg ? 'white' : '#6c757d',
+                                    border: selectedSeg === seg ? '2px solid #7c3aed' : '2px solid #dee2e6'
+                                }}>
+                                {seg}
+                            </div>
+                        ))}
+                    </div>
+                    <div ref={heatRef}></div>
+                </div>
+            );
         }
 
         // ═══════════════════════════════════════════════
