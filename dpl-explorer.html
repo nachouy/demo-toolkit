@@ -1449,6 +1449,31 @@
                         <RadarChartWidget data={data} />
                     </div>
 
+                    {/* 4 Heatmaps */}
+                    <div className="content-section">
+                        <div className="section-header"><h2 className="section-title">Conversion Heatmap by Time</h2></div>
+                        <p style={{color: 'var(--parsely-gray-600)', fontSize: '0.85rem', marginBottom: '0.5rem'}}>When do conversions happen? Distribution by day of week and hour.</p>
+                        <ConversionHeatmap data={data} />
+                    </div>
+
+                    <div className="content-section">
+                        <div className="section-header"><h2 className="section-title">Conversion Heatmap by Custom Audience</h2></div>
+                        <p style={{color: 'var(--parsely-gray-600)', fontSize: '0.85rem', marginBottom: '0.5rem'}}>Which audience segments convert at which times?</p>
+                        <HeatmapByAudience data={data} />
+                    </div>
+
+                    <div className="content-section">
+                        <div className="section-header"><h2 className="section-title">Topics by Time of Day</h2></div>
+                        <p style={{color: 'var(--parsely-gray-600)', fontSize: '0.85rem', marginBottom: '0.5rem'}}>Which content topics perform best at each hour?</p>
+                        <HeatmapTopicsByTime data={data} />
+                    </div>
+
+                    <div className="content-section">
+                        <div className="section-header"><h2 className="section-title">Topics by Custom Audience Segment</h2></div>
+                        <p style={{color: 'var(--parsely-gray-600)', fontSize: '0.85rem', marginBottom: '0.5rem'}}>Which topics resonate with which audience segments?</p>
+                        <HeatmapTopicsByAudience data={data} />
+                    </div>
+
                     <div className="content-section">
                         <div className="section-header">
                             <h2 className="section-title">Other Custom Metrics</h2>
@@ -1463,15 +1488,10 @@
                                 <div className="preset-card-title">Content Performance Radar</div>
                                 <div className="preset-card-desc">Radar chart: Interest, Engagement, Reach, Conversion (current vs previous)</div>
                             </div>
-                            <div className={`preset-card ${selectedPreset === 'heatmap' ? 'active' : ''}`} onClick={() => setSelectedPreset('heatmap')}>
-                                <div className="preset-card-title">Conversion Funnel Heatmap</div>
-                                <div className="preset-card-desc">Time-of-day heatmap showing conversion distribution by day of week</div>
-                            </div>
                         </div>
 
                         {selectedPreset === 'referrer' && <ReferrerDualAxisChart data={data} />}
                         {selectedPreset === 'radar' && <ContentRadarChart data={data} />}
-                        {selectedPreset === 'heatmap' && <ConversionHeatmap data={data} />}
                     </div>
                 </>
             );
@@ -1766,6 +1786,247 @@
                     }
                 });
 
+            }, [data]);
+
+            return <div ref={heatRef} style={{marginTop: '1.5rem'}}></div>;
+        }
+
+        // Heatmap: Conversions by Custom Audience Segment (rows=segments, cols=hours)
+        function HeatmapByAudience({ data }) {
+            const heatRef = useRef(null);
+
+            useEffect(() => {
+                if (!heatRef.current) return;
+                d3.select(heatRef.current).selectAll("*").remove();
+
+                const segments = AUDIENCE_SEGMENTS;
+                const hours = Array.from({length: 24}, (_, i) => i);
+
+                const matrix = segments.map(() => hours.map(() => 0));
+                data.forEach(d => {
+                    if (!d.conversion_type || !d.ts_action) return;
+                    let seg;
+                    try { seg = JSON.parse(d.extra_data || '{}').audience_segment; } catch { return; }
+                    const si = segments.indexOf(seg);
+                    if (si < 0) return;
+                    const hour = new Date(d.ts_action).getHours();
+                    matrix[si][hour]++;
+                });
+
+                const maxVal = Math.max(1, ...matrix.flat());
+                const width = heatRef.current.clientWidth;
+                const cellW = Math.max(16, (width - 120) / 24);
+                const cellH = 32;
+                const margin = { top: 30, left: 110 };
+                const height = margin.top + segments.length * cellH + 20;
+
+                const svg = d3.select(heatRef.current).append("svg").attr("width", width).attr("height", height);
+                const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+                const colorScale = d3.scaleSequential(d3.interpolateBlues).domain([0, maxVal]);
+
+                const tooltip = d3.select("body").append("div")
+                    .style("position", "absolute").style("background", "rgba(0,0,0,0.85)").style("color", "white")
+                    .style("padding", "6px 12px").style("border-radius", "6px").style("font-size", "12px")
+                    .style("pointer-events", "none").style("opacity", 0).style("z-index", 9999).attr("class", "hm-aud-tip");
+
+                segments.forEach((seg, si) => {
+                    hours.forEach((hour, hi) => {
+                        g.append("rect")
+                            .attr("x", hi * cellW).attr("y", si * cellH)
+                            .attr("width", cellW - 2).attr("height", cellH - 2)
+                            .attr("rx", 3).attr("fill", colorScale(matrix[si][hi]))
+                            .style("cursor", "pointer")
+                            .on("mouseover", function(event) {
+                                tooltip.html(`<strong>${seg}</strong> at ${hour}:00<br/>${matrix[si][hi]} conversions`)
+                                    .style("left", (event.pageX + 12) + "px").style("top", (event.pageY - 28) + "px").style("opacity", 1);
+                            })
+                            .on("mousemove", function(event) {
+                                tooltip.style("left", (event.pageX + 12) + "px").style("top", (event.pageY - 28) + "px");
+                            })
+                            .on("mouseout", function() { tooltip.style("opacity", 0); });
+                    });
+                    g.append("text").attr("x", -8).attr("y", si * cellH + cellH / 2)
+                        .attr("text-anchor", "end").attr("dy", "0.35em")
+                        .style("font-size", "11px").style("font-weight", "600").style("fill", "#495057")
+                        .text(seg);
+                });
+
+                hours.forEach(h => {
+                    if (h % 3 === 0) {
+                        g.append("text").attr("x", h * cellW + cellW / 2).attr("y", -8)
+                            .attr("text-anchor", "middle")
+                            .style("font-size", "10px").style("fill", "#6c757d")
+                            .text(`${h}:00`);
+                    }
+                });
+
+                return () => { d3.selectAll(".hm-aud-tip").remove(); };
+            }, [data]);
+
+            return <div ref={heatRef} style={{marginTop: '1.5rem'}}></div>;
+        }
+
+        // Heatmap: Topics by Time of Day (rows=topics, cols=hours, value=engagement)
+        function HeatmapTopicsByTime({ data }) {
+            const heatRef = useRef(null);
+
+            useEffect(() => {
+                if (!heatRef.current) return;
+                d3.select(heatRef.current).selectAll("*").remove();
+
+                const topics = ['News', 'Sports', 'Politics', 'Tech', 'Culture'];
+                const hours = Array.from({length: 24}, (_, i) => i);
+
+                // Engagement count per topic per hour
+                const matrix = topics.map(() => hours.map(() => ({ total: 0, count: 0 })));
+                data.forEach(d => {
+                    if (!d.metadata_section || !d.ts_action) return;
+                    const ti = topics.indexOf(d.metadata_section);
+                    if (ti < 0) return;
+                    const hour = new Date(d.ts_action).getHours();
+                    matrix[ti][hour].total += parseInt(d.engaged_time_inc) || 0;
+                    matrix[ti][hour].count++;
+                });
+
+                const avgMatrix = matrix.map(row => row.map(cell => cell.count > 0 ? cell.total / cell.count : 0));
+                const maxVal = Math.max(1, ...avgMatrix.flat());
+                const width = heatRef.current.clientWidth;
+                const cellW = Math.max(16, (width - 90) / 24);
+                const cellH = 36;
+                const margin = { top: 30, left: 80 };
+                const height = margin.top + topics.length * cellH + 20;
+
+                const svg = d3.select(heatRef.current).append("svg").attr("width", width).attr("height", height);
+                const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+                const colorScale = d3.scaleSequential(d3.interpolateOranges).domain([0, maxVal]);
+
+                const tooltip = d3.select("body").append("div")
+                    .style("position", "absolute").style("background", "rgba(0,0,0,0.85)").style("color", "white")
+                    .style("padding", "6px 12px").style("border-radius", "6px").style("font-size", "12px")
+                    .style("pointer-events", "none").style("opacity", 0).style("z-index", 9999).attr("class", "hm-topic-time-tip");
+
+                topics.forEach((topic, ti) => {
+                    hours.forEach((hour, hi) => {
+                        g.append("rect")
+                            .attr("x", hi * cellW).attr("y", ti * cellH)
+                            .attr("width", cellW - 2).attr("height", cellH - 2)
+                            .attr("rx", 3).attr("fill", colorScale(avgMatrix[ti][hi]))
+                            .style("cursor", "pointer")
+                            .on("mouseover", function(event) {
+                                tooltip.html(`<strong>${topic}</strong> at ${hour}:00<br/>Avg engagement: ${avgMatrix[ti][hi].toFixed(1)}s<br/>${matrix[ti][hi].count} events`)
+                                    .style("left", (event.pageX + 12) + "px").style("top", (event.pageY - 28) + "px").style("opacity", 1);
+                            })
+                            .on("mousemove", function(event) {
+                                tooltip.style("left", (event.pageX + 12) + "px").style("top", (event.pageY - 28) + "px");
+                            })
+                            .on("mouseout", function() { tooltip.style("opacity", 0); });
+                    });
+                    g.append("text").attr("x", -8).attr("y", ti * cellH + cellH / 2)
+                        .attr("text-anchor", "end").attr("dy", "0.35em")
+                        .style("font-size", "12px").style("font-weight", "600").style("fill", "#495057")
+                        .text(topic);
+                });
+
+                hours.forEach(h => {
+                    if (h % 3 === 0) {
+                        g.append("text").attr("x", h * cellW + cellW / 2).attr("y", -8)
+                            .attr("text-anchor", "middle")
+                            .style("font-size", "10px").style("fill", "#6c757d")
+                            .text(`${h}:00`);
+                    }
+                });
+
+                return () => { d3.selectAll(".hm-topic-time-tip").remove(); };
+            }, [data]);
+
+            return <div ref={heatRef} style={{marginTop: '1.5rem'}}></div>;
+        }
+
+        // Heatmap: Topics by Custom Audience Segment (rows=topics, cols=segments, value=engagement)
+        function HeatmapTopicsByAudience({ data }) {
+            const heatRef = useRef(null);
+
+            useEffect(() => {
+                if (!heatRef.current) return;
+                d3.select(heatRef.current).selectAll("*").remove();
+
+                const topics = ['News', 'Sports', 'Politics', 'Tech', 'Culture'];
+                const segments = AUDIENCE_SEGMENTS;
+
+                // Avg engagement per topic per segment
+                const matrix = topics.map(() => segments.map(() => ({ total: 0, count: 0 })));
+                data.forEach(d => {
+                    if (!d.metadata_section) return;
+                    const ti = topics.indexOf(d.metadata_section);
+                    if (ti < 0) return;
+                    let seg;
+                    try { seg = JSON.parse(d.extra_data || '{}').audience_segment; } catch { return; }
+                    const si = segments.indexOf(seg);
+                    if (si < 0) return;
+                    matrix[ti][si].total += parseInt(d.engaged_time_inc) || 0;
+                    matrix[ti][si].count++;
+                });
+
+                const avgMatrix = matrix.map(row => row.map(cell => cell.count > 0 ? cell.total / cell.count : 0));
+                const maxVal = Math.max(1, ...avgMatrix.flat());
+                const width = heatRef.current.clientWidth;
+                const cellW = Math.max(60, (width - 90) / segments.length);
+                const cellH = 42;
+                const margin = { top: 60, left: 80 };
+                const height = margin.top + topics.length * cellH + 20;
+
+                const svg = d3.select(heatRef.current).append("svg").attr("width", width).attr("height", height);
+                const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+                const colorScale = d3.scaleSequential(d3.interpolatePurples).domain([0, maxVal]);
+
+                const tooltip = d3.select("body").append("div")
+                    .style("position", "absolute").style("background", "rgba(0,0,0,0.85)").style("color", "white")
+                    .style("padding", "6px 12px").style("border-radius", "6px").style("font-size", "12px")
+                    .style("pointer-events", "none").style("opacity", 0).style("z-index", 9999).attr("class", "hm-topic-aud-tip");
+
+                topics.forEach((topic, ti) => {
+                    segments.forEach((seg, si) => {
+                        g.append("rect")
+                            .attr("x", si * cellW).attr("y", ti * cellH)
+                            .attr("width", cellW - 3).attr("height", cellH - 3)
+                            .attr("rx", 4).attr("fill", colorScale(avgMatrix[ti][si]))
+                            .style("cursor", "pointer")
+                            .on("mouseover", function(event) {
+                                tooltip.html(`<strong>${topic}</strong> × <strong>${seg}</strong><br/>Avg engagement: ${avgMatrix[ti][si].toFixed(1)}s<br/>${matrix[ti][si].count} events`)
+                                    .style("left", (event.pageX + 12) + "px").style("top", (event.pageY - 28) + "px").style("opacity", 1);
+                            })
+                            .on("mousemove", function(event) {
+                                tooltip.style("left", (event.pageX + 12) + "px").style("top", (event.pageY - 28) + "px");
+                            })
+                            .on("mouseout", function() { tooltip.style("opacity", 0); });
+
+                        // Show value inside cell
+                        if (avgMatrix[ti][si] > 0) {
+                            g.append("text")
+                                .attr("x", si * cellW + (cellW - 3) / 2).attr("y", ti * cellH + (cellH - 3) / 2)
+                                .attr("text-anchor", "middle").attr("dy", "0.35em")
+                                .style("font-size", "11px").style("font-weight", "700")
+                                .style("fill", avgMatrix[ti][si] > maxVal * 0.6 ? "white" : "#495057")
+                                .text(avgMatrix[ti][si].toFixed(0) + 's');
+                        }
+                    });
+                    g.append("text").attr("x", -8).attr("y", ti * cellH + cellH / 2)
+                        .attr("text-anchor", "end").attr("dy", "0.35em")
+                        .style("font-size", "12px").style("font-weight", "600").style("fill", "#495057")
+                        .text(topic);
+                });
+
+                // Column headers (rotated)
+                segments.forEach((seg, si) => {
+                    g.append("text")
+                        .attr("x", si * cellW + (cellW - 3) / 2).attr("y", -10)
+                        .attr("text-anchor", "end")
+                        .attr("transform", `rotate(-35, ${si * cellW + (cellW - 3) / 2}, -10)`)
+                        .style("font-size", "11px").style("font-weight", "600").style("fill", "#495057")
+                        .text(seg);
+                });
+
+                return () => { d3.selectAll(".hm-topic-aud-tip").remove(); };
             }, [data]);
 
             return <div ref={heatRef} style={{marginTop: '1.5rem'}}></div>;
